@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import { signInWithGoogle, signOut } from './AuthService';
 import { auth } from './firebase';
 import HomeBanner from './components/HomeBanner';
+import NuthatchApiComponent from './components/NuthatchApiComponent';
 import './styles.css'
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         onSignOut={() => signOut().then(() => setUser(null))}
       />
       <HomeBanner />
+      <NuthatchApiComponent />
     </ChakraProvider>
   );
 }

@@ -85,8 +85,8 @@ const Lists = ({ user }) => {
                             </Stack>
                         </CardBody>
                         <CardFooter>
-                            <Button size="sm" colorScheme="red" onClick={() => handleDeleteList(list.id)}>Delete</Button>
-                            <Button size="sm" colorScheme="blue" ml="2">View List</Button>
+                            <Button variant='outline' size="sm" colorScheme="red" onClick={() => handleDeleteList(list.id)}>Delete</Button>
+                            <Button variant='outline' size="sm" colorScheme="blue" ml="2">View List</Button>
                         </CardFooter>
                     </Card>
                 ))}

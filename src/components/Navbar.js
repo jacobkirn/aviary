@@ -75,8 +75,8 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
     return (
         <Flex justifyContent="space-between" alignItems="center" p="4">
             <Flex alignItems="center">
-                <LuBird size="24px" style={{ marginRight: '0.5rem' }} /> {/* Add the bird icon */}
-                <Heading size="md" mb="0.5"><span id="logo">Aviary</span></Heading>
+                <LuBird size="24px" style={{ marginRight: '6px' }} /> {/* Add the bird icon */}
+                <Heading id="logo" size="md" mb="0.5">Aviary</Heading>
             </Flex>
 
             <Flex alignItems="center">

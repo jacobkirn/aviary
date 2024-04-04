@@ -3,9 +3,10 @@ import { ChakraProvider } from '@chakra-ui/react';
 import Navbar from './components/Navbar';
 import { signInWithGoogle, signOut } from './AuthService';
 import { auth } from './firebase';
-import HomeBanner from './components/HomeBanner';
+import Home from './components/Home';
 import NuthatchApiComponent from './components/NuthatchApiComponent';
-import './styles.css'
+import NotLogged from './components/NotLogged'; // Import the login prompt component
+import './styles.css';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -23,8 +24,7 @@ function App() {
         onSignIn={signInWithGoogle}
         onSignOut={() => signOut().then(() => setUser(null))}
       />
-      <HomeBanner />
-      <NuthatchApiComponent />
+      {user ? <Home /> : <NotLogged />}
     </ChakraProvider>
   );
 }

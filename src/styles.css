@@ -1,6 +1,30 @@
-.banner {
+/* .banner {
     background-image: url('../public/images/banner.jpg');
     height: 600px;
     background-size: cover;
     background-position: 50%;
+}
+
+*/
+
+#logo {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 24px;
+}
+
+#welcome {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 48px;
+    margin-bottom: 20px;
+    padding: 0;
+}
+
+.css-a5mhaz {
+    --chakra-space-4: 0px;
 }

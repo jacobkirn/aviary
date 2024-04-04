@@ -23,7 +23,6 @@ const GenericModal = ({
   isConfirmButtonLoading = false,
   isCancelButtonLoading = false,
 }) => {
-  // `onCancel` is optional. If not provided, use `onClose` as default.
   const handleCancel = onCancel || onClose;
 
   return (

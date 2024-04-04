@@ -10,13 +10,12 @@ const useFetchBirds = (searchTerm, triggerSearch) => {
             if (triggerSearch && searchTerm) {
                 setIsLoading(true);
                 try {
-                    // Adjust URL, headers, and params as necessary based on the API documentation
                     const response = await axios.get(`https://nuthatch.lastelm.software/v2/birds`, {
                         params: {
                             name: searchTerm,
                             hasImg: true,
                             operator: 'AND',
-                            pageSize: 30 // Adjust page size as necessary
+                            pageSize: 30
                         },
                         headers: {
                             'API-Key': '7d077ea8-7b2e-4a97-abee-a56aaf551f2a'
@@ -24,7 +23,7 @@ const useFetchBirds = (searchTerm, triggerSearch) => {
                     });
                     const processedBirds = response.data.entities.map(bird => ({
                         ...bird,
-                        imageUrl: bird.images.length > 0 ? bird.images[0] : null // Assumes images is an array of URLs
+                        imageUrl: bird.images.length > 0 ? bird.images[0] : null
                     }));
                     setBirds(processedBirds);
                 } catch (error) {

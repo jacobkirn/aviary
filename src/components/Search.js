@@ -6,9 +6,8 @@ import {
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import GenericModal from './GenericModal';
-import useFetchBirds from '../hooks/useFetchBirds'; // Adjust this path as necessary
+import useFetchBirds from '../hooks/useFetchBirds';
 
-// Define getColorScheme outside of the Search component
 const getColorScheme = (status) => {
     switch (status) {
         case 'Low Concern':
@@ -20,7 +19,7 @@ const getColorScheme = (status) => {
         case 'Red Watch List':
             return 'red';
         default:
-            return 'gray'; // Default case for empty or unrecognized status
+            return 'gray';
     }
 };
 
@@ -30,12 +29,10 @@ const Search = () => {
     const { birds, isLoading } = useFetchBirds(searchTerm, triggerSearch);
 
     const handleSearchClick = () => {
-        if (!searchTerm.trim()) return; // Prevent searching with an empty string
-        setTriggerSearch(true); // Initiate the search
+        if (!searchTerm.trim()) return;
+        setTriggerSearch(true);
     };
 
-    // Resets triggerSearch to false after a search is made
-    // to prepare for the next search trigger
     useEffect(() => {
         if (triggerSearch) setTriggerSearch(false);
     }, [triggerSearch]);
@@ -106,7 +103,6 @@ const BirdCard = ({ bird }) => {
                         <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Status Unknown"}</Tag>
                     </Stack>
                 </CardBody>
-                {/* Implement any other button or action you need here */}
             </Card>
         </Box>
     );

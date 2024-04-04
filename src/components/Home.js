@@ -16,8 +16,8 @@ export default class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      firstName: '', // State to store the user's first name
-      user: null // State to store the user object
+      firstName: '',
+      user: null
     };
   }
 

@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, query, where, getDocs, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Box, Button, Card, CardBody, CardFooter, Container, Stack, SimpleGrid, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, IconButton, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
-import { FaEllipsisV } from 'react-icons/fa'; // Import meatball icon
-import { BiTrash } from 'react-icons/bi'; // Import trash icon
+import { FaEllipsisV } from 'react-icons/fa';
+import { BiTrash } from 'react-icons/bi';
 
 const Lists = ({ user }) => {
     const [lists, setLists] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newListName, setNewListName] = useState('');
     const [newListDescription, setNewListDescription] = useState('');
-    const [selectedListId, setSelectedListId] = useState(null); // State to store the selected list ID for deletion
-    const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
+    const [selectedListId, setSelectedListId] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-    // Move fetchLists outside of useEffect to make it available in the component scope
     const fetchLists = async () => {
         if (!user) return;
 
@@ -32,7 +31,7 @@ const Lists = ({ user }) => {
 
     useEffect(() => {
         fetchLists();
-    }, [user]); // Dependency array ensures fetchLists is called when the component mounts or when user changes
+    }, [user]);
 
     const handleAddList = async () => {
         try {

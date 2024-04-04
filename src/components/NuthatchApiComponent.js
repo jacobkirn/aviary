@@ -186,7 +186,7 @@ const NuthatchApiComponent = () => {
                         onKeyPress={handleKeyPress}
                     />
                     <InputRightElement width='4.5rem'>
-                        <Button colorScheme='linkedin' pr="10px" size='sm' mr="2" borderRadius="4px" onClick={handleSearch}>
+                        <Button colorScheme='blue' pr="10px" size='sm' mr="2" borderRadius="4px" onClick={handleSearch}>
                             Search
                         </Button>
                     </InputRightElement>

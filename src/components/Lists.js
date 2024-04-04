@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, query, where, getDocs, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Box, Button, Card, CardBody, CardFooter, Container, Stack, SimpleGrid, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, IconButton, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
 import { FaEllipsisV } from 'react-icons/fa'; // Import meatball icon
+import { BiTrash } from 'react-icons/bi'; // Import trash icon
 
 const Lists = ({ user }) => {
     const [lists, setLists] = useState([]);
@@ -84,13 +85,15 @@ const Lists = ({ user }) => {
                         </CardBody>
                         <CardFooter mt="-20px" gap="10px">
                             <Button flex={1} variant='outline' size="sm" colorScheme="blue">View List</Button>
-                            <Menu>
+                            <Menu placement="bottom-start">
                                 <MenuButton as={IconButton} aria-label="Options" icon={<FaEllipsisV transform="rotate(90)" />} colorScheme="gray" variant={'ghost'} size="sm" />
                                 <MenuList>
-                                    <MenuItem onClick={() => openDeleteConfirmation(list.id)} colorScheme="red">Delete</MenuItem>
-                                    {/* Add more menu items here if needed */}
+                                    <MenuItem onClick={() => openDeleteConfirmation(list.id)} color="red.500">
+                                        <Icon as={BiTrash} mr={2} /> Delete
+                                    </MenuItem>
                                 </MenuList>
                             </Menu>
+
                         </CardFooter>
                     </Card>
                 ))}

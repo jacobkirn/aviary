@@ -1,73 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, query, where, getDocs, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Button, Card, CardBody, CardFooter, Container, Stack, SimpleGrid, Tag, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input } from '@chakra-ui/react';
+import { Box, Button, Card, CardBody, CardFooter, Container, Stack, SimpleGrid, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, IconButton, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
+import { FaEllipsisV } from 'react-icons/fa'; // Import meatball icon
 
 const Lists = ({ user }) => {
     const [lists, setLists] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newListName, setNewListName] = useState('');
     const [newListDescription, setNewListDescription] = useState('');
+    const [selectedListId, setSelectedListId] = useState(null); // State to store the selected list ID for deletion
+    const [showDeleteModal, setShowDeleteModal] = useState(false); // State for delete confirmation modal
+
+    // Move fetchLists outside of useEffect to make it available in the component scope
+    const fetchLists = async () => {
+        if (!user) return;
+
+        const db = getFirestore();
+        try {
+            const q = query(collection(db, 'lists'), where('createdBy', '==', user.uid));
+            const querySnapshot = await getDocs(q);
+            const listsData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setLists(listsData);
+        } catch (error) {
+            console.error('Error fetching lists:', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchLists = async () => {
-            if (!user) return; // Exit early if user is not logged in
-        
-            try {
-                const db = getFirestore();
-                const q = query(collection(db, 'lists'), where('createdBy', '==', user.uid));
-                const querySnapshot = await getDocs(q);
-                const listsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                // Calculate the bird count for each list
-                const listsWithBirdCount = await Promise.all(listsData.map(async (list) => {
-                    const listRef = doc(db, 'lists', list.id);
-                    const birdQuerySnapshot = await getDocs(collection(listRef, 'birds'));
-                    const birdCount = birdQuerySnapshot.size;
-                    return { ...list, birdCount };
-                }));
-        
-                setLists(listsWithBirdCount);
-            } catch (error) {
-                console.error('Error fetching lists:', error);
-            }
-        };
-
-        fetchLists(); // Call fetchLists when the component mounts or when user changes
-    }, [user]);
+        fetchLists();
+    }, [user]); // Dependency array ensures fetchLists is called when the component mounts or when user changes
 
     const handleAddList = async () => {
         try {
             const db = getFirestore();
-            const newListRef = await addDoc(collection(db, 'lists'), {
+            await addDoc(collection(db, 'lists'), {
                 name: newListName,
                 description: newListDescription,
                 createdBy: user.uid,
                 createdAt: serverTimestamp(),
             });
-            const newListData = {
-                id: newListRef.id,
-                name: newListName,
-                description: newListDescription,
-                birdCount: 0, // Assuming new list has no birds initially
-                createdAt: new Date()
-            };
-            setLists(prevLists => [...prevLists, newListData]);
-            setNewListName('');
+            fetchLists(); // Re-fetch lists to see the new list
+            setShowModal(false); // Close the modal after adding
+            setNewListName(''); // Reset form fields
             setNewListDescription('');
-            setShowModal(false);
         } catch (error) {
             console.error('Error adding list:', error);
         }
     };
 
-    const handleDeleteList = async (listId) => {
+    const handleDeleteList = async () => {
         try {
             const db = getFirestore();
-            await deleteDoc(doc(db, 'lists', listId));
-            setLists(prevLists => prevLists.filter(list => list.id !== listId));
+            await deleteDoc(doc(db, 'lists', selectedListId));
+            fetchLists(); // Re-fetch lists to update the UI after deletion
         } catch (error) {
             console.error('Error deleting list:', error);
+        } finally {
+            setSelectedListId(null); // Reset selected list ID after deletion
+            setShowDeleteModal(false); // Close the delete confirmation modal
         }
+    };
+
+    const openDeleteConfirmation = (listId) => {
+        setSelectedListId(listId);
+        setShowDeleteModal(true);
     };
 
     return (
@@ -78,20 +77,24 @@ const Lists = ({ user }) => {
                     <Card key={list.id} variant={'outline'} maxWidth="400px">
                         <CardBody p="6">
                             <Stack align="start" spacing="2">
-                                <Heading id="logo" as="h3" size="md" p="0">{list.name}</Heading>
+                                <Heading as="h3" size="md" id="logo">{list.name}</Heading>
                                 <p>{list.description}</p>
-                                <Tag colorScheme="blue">Birds: {list.birdCount}</Tag>
-                                <p>Created: {list.createdAt instanceof Date ? list.createdAt.toLocaleDateString() : 'Unknown'}</p>
+                                <p>Created: {list.createdAt ? new Date(list.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
                             </Stack>
                         </CardBody>
-                        <CardFooter>
-                            <Button variant='outline' size="sm" colorScheme="red" onClick={() => handleDeleteList(list.id)}>Delete</Button>
-                            <Button variant='outline' size="sm" colorScheme="blue" ml="2">View List</Button>
+                        <CardFooter mt="-20px" gap="10px">
+                            <Button flex={1} variant='outline' size="sm" colorScheme="blue">View List</Button>
+                            <Menu>
+                                <MenuButton as={IconButton} aria-label="Options" icon={<FaEllipsisV transform="rotate(90)" />} colorScheme="gray" variant={'ghost'} size="sm" />
+                                <MenuList>
+                                    <MenuItem onClick={() => openDeleteConfirmation(list.id)} colorScheme="red">Delete</MenuItem>
+                                    {/* Add more menu items here if needed */}
+                                </MenuList>
+                            </Menu>
                         </CardFooter>
                     </Card>
                 ))}
             </SimpleGrid>
-
             {/* Modal for adding new list */}
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <ModalOverlay />
@@ -111,6 +114,23 @@ const Lists = ({ user }) => {
                     <ModalFooter>
                         <Button colorScheme="blue" onClick={handleAddList}>Add</Button>
                         <Button colorScheme="gray" ml={3} onClick={() => setShowModal(false)}>Cancel</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+            {/* Modal for delete confirmation */}
+            <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Delete List</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <FormControl>
+                            <FormLabel>Are you sure you want to delete this list?</FormLabel>
+                        </FormControl>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="red" onClick={handleDeleteList}>Yes, Delete</Button>
+                        <Button colorScheme="gray" ml={3} onClick={() => setShowDeleteModal(false)}>Cancel</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

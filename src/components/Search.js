@@ -37,7 +37,7 @@ import { doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '../firebase'; // Make sure this path is correct
 import { addBirdToList } from '../firestoreServices'; // Adjust the path as needed
 
-const NuthatchApiComponent = () => {
+const Search = () => {
     const [birds, setBirds] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -264,7 +264,7 @@ const NuthatchApiComponent = () => {
     );
 };
 
-export default NuthatchApiComponent;
+export default Search;
 
 // Function to determine Tag color scheme based on conservation status
 const getColorScheme = (status) => {

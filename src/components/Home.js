@@ -9,7 +9,7 @@ import {
   TabPanels,
   TabPanel
 } from '@chakra-ui/react';
-import NuthatchApiComponent from './NuthatchApiComponent';
+import Search from './Search';
 import Lists from './Lists';
 
 export default class Home extends Component {
@@ -53,7 +53,7 @@ export default class Home extends Component {
             />
             <TabPanels>
               <TabPanel>
-                <NuthatchApiComponent />
+                <Search />
               </TabPanel>
               <TabPanel>
                 {/* Pass the user prop to the Lists component */}

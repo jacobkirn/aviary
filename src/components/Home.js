@@ -10,12 +10,14 @@ import {
   TabPanel
 } from '@chakra-ui/react';
 import NuthatchApiComponent from './NuthatchApiComponent';
+import Lists from './Lists';
 
 export default class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
       firstName: '', // State to store the user's first name
+      user: null // State to store the user object
     };
   }
 
@@ -27,13 +29,13 @@ export default class Home extends Component {
     if (currentUser) {
       // Extract the user's display name (first name)
       const firstName = currentUser.displayName.split(' ')[0];
-      // Set the state with the user's first name
-      this.setState({ firstName });
+      // Set the state with the user's first name and user object
+      this.setState({ firstName, user: currentUser });
     }
   }
 
   render() {
-    const { firstName } = this.state;
+    const { firstName, user } = this.state;
     return (
       <div>
         <Container maxW="container.xl" >
@@ -54,12 +56,12 @@ export default class Home extends Component {
                 <NuthatchApiComponent />
               </TabPanel>
               <TabPanel>
-                <p>two!</p>
+                {/* Pass the user prop to the Lists component */}
+                <Lists user={user} />
               </TabPanel>
             </TabPanels>
           </Tabs>
         </Container>
-
       </div>
     );
   }

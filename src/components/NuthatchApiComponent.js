@@ -18,9 +18,19 @@ import {
     CardBody,
     CardFooter,
     InputGroup,
-    InputLeftElement
+    InputLeftElement,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    FormControl,
+    FormLabel,
+    Select
 } from '@chakra-ui/react';
-import { SearchIcon, SmallAddIcon, InfoOutlineIcon } from '@chakra-ui/icons'; // Import icons
+import { SearchIcon } from '@chakra-ui/icons'; // Import icons
 import axios from 'axios';
 
 const NuthatchApiComponent = () => {
@@ -29,12 +39,15 @@ const NuthatchApiComponent = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedList, setSelectedList] = useState('');
+    const [updatedBirdCount, setUpdatedBirdCount] = useState(null);
     const pageSize = 24; // Number of birds to fetch per page
     const apiKey = '7d077ea8-7b2e-4a97-abee-a56aaf551f2a';
 
     useEffect(() => {
         fetchData();
-    }, [currentPage]); 
+    }, [currentPage, updatedBirdCount]); 
 
     const fetchData = async () => {
         try {
@@ -63,6 +76,25 @@ const NuthatchApiComponent = () => {
         }
     };
 
+    const handleOpenModal = () => {
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+    };
+
+    const handleSelectList = (event) => {
+        setSelectedList(event.target.value);
+    };
+
+    const handleAddToList = () => {
+        // Update the bird count in the selected list
+        setUpdatedBirdCount(selectedList);
+        // Close the modal
+        setShowModal(false);
+    };
+
     return (
         <Container maxW="container.xl" mt="40px" mb="40px;">
             <Flex justify="space-between" align="center" mb="40px" gap="10px">
@@ -79,7 +111,7 @@ const NuthatchApiComponent = () => {
                         onKeyPress={handleKeyPress}
                     />
                     <InputRightElement width='4.5rem'>
-                        <Button colorScheme='linkedin' pr="10px" size='sm' mr="2" onClick={handleSearch}>
+                        <Button colorScheme='linkedin' pr="10px" size='sm' mr="2" borderRadius="4px" onClick={handleSearch}>
                             Search
                         </Button>
                     </InputRightElement>
@@ -123,7 +155,7 @@ const NuthatchApiComponent = () => {
                                     <Button variant='outline' colorScheme='gray' flex={1}>
                                         Details
                                     </Button>
-                                    <Button variant='outline' colorScheme='gray' flex={1}>
+                                    <Button variant='outline' colorScheme='gray' flex={1} onClick={handleOpenModal}>
                                         Add
                                     </Button>
                                 </CardFooter>
@@ -132,6 +164,28 @@ const NuthatchApiComponent = () => {
                     ))
                 }
             </SimpleGrid>
+            {/* Modal for selecting list */}
+            <Modal isOpen={showModal} onClose={handleCloseModal}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Add Bird to List</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        <FormControl>
+                            <FormLabel>Select a list:</FormLabel>
+                            <Select placeholder="Select list" value={selectedList} onChange={handleSelectList}>
+                                {/* Render options for available lists */}
+                                <option value="list1">List 1</option>
+                                <option value="list2">List 2</option>
+                                <option value="list3">List 3</option>
+                            </Select>
+                        </FormControl>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="blue" onClick={handleAddToList}>OK</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </Container>
     );
 };

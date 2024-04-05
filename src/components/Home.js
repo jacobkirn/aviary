@@ -42,8 +42,8 @@ export default class Home extends Component {
           <h2 id="welcome">Welcome, {firstName}.</h2>
           <Tabs size="lg" position="relative" variant="unstyled">
             <TabList>
-              <Tab>Search</Tab>
               <Tab>Lists</Tab>
+              <Tab>Search</Tab>
             </TabList>
             <TabIndicator
               mt="4px"
@@ -53,11 +53,11 @@ export default class Home extends Component {
             />
             <TabPanels>
               <TabPanel>
-                <Search />
-              </TabPanel>
-              <TabPanel>
                 {/* Pass the user prop to the Lists component */}
                 <Lists user={user} />
+              </TabPanel>
+              <TabPanel>
+                <Search />
               </TabPanel>
             </TabPanels>
           </Tabs>

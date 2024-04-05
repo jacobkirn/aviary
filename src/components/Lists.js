@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, addDoc, collection, query, where, getDocs, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import {
-    AspectRatio, Box, Button, Card, Image, CardBody, SimpleGrid, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs,
+    AspectRatio, Box, Tag, Button, Card, Image, CardBody, CardFooter, SimpleGrid, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs,
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input,
     Select, Flex,
 } from '@chakra-ui/react';
@@ -114,12 +114,21 @@ const Lists = ({ user }) => {
                                             />
                                         </AspectRatio>
                                         <CardBody p="6">
-                                            <Heading as="h4" size="md">{bird.name}</Heading>
-                                            <p>Family: {bird.family}</p>
+                                            <Heading id="logo" as="h3" size="md" mb="8px">
+                                                {bird.name}
+                                            </Heading>
+                                            <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
+                                            {/* <p>Family: {bird.family}</p>
                                             <p>Order: {bird.order}</p>
                                             <p>Status: {bird.status}</p>
                                             {/* Add other relevant bird properties */}
                                         </CardBody>
+                                        <CardFooter gap="10px" mt="-20px">
+                                            <Button variant='outline' colorScheme='gray' flex={1}>
+                                                Details
+                                            </Button>
+                                            <Button variant='outline' colorScheme='gray' flex={1}>Remove</Button>
+                                        </CardFooter>
                                     </Card>
                                 ))}
                             </SimpleGrid>
@@ -155,3 +164,18 @@ const Lists = ({ user }) => {
 };
 
 export default Lists;
+
+const getColorScheme = (status) => {
+    switch (status) {
+        case 'Low Concern':
+            return 'green';
+        case 'Common Bird in Steep Decline':
+            return 'orange';
+        case 'Declining':
+            return 'yellow';
+        case 'Red Watch List':
+            return 'red';
+        default:
+            return 'gray';
+    }
+}

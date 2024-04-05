@@ -11,11 +11,10 @@ import axios from 'axios';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '../firebase';
-import { addBirdToList } from '../firestoreServices';
 
 const Search = () => {
     const [birds, setBirds] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(null); // Initialize with null
     const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -25,14 +24,18 @@ const Search = () => {
     const [updatedBirdCount, setUpdatedBirdCount] = useState(null);
     const pageSize = 24; // Number of birds to fetch per page
     const apiKey = '7d077ea8-7b2e-4a97-abee-a56aaf551f2a';
+    const [shouldSearchManually, setShouldSearchManually] = useState(false);
 
     useEffect(() => {
         fetchUserLists();
-    }, []); // This ensures fetchUserLists is called when the component mounts
+    }, []);
 
     useEffect(() => {
-        fetchData();
-    }, [currentPage, updatedBirdCount]);
+        if (shouldSearchManually && currentPage !== null) { // Check if shouldSearchManually is true and currentPage is not null before fetching data
+            fetchData();
+            setShouldSearchManually(false); // Reset shouldSearchManually state after triggering search
+        }
+    }, [shouldSearchManually, currentPage, updatedBirdCount]);
 
     const fetchUserLists = async () => {
         if (!auth.currentUser) return;
@@ -49,25 +52,23 @@ const Search = () => {
         } catch (error) {
             console.error("Error fetching user lists:", error);
         }
-
-        console.log(lists);
     };
 
     const db = getFirestore();
 
-    const handleOpenModal = async (birdId) => {
-        setSelectedBird(birdId); // Set the selected bird ID
+    const handleOpenModal = async (bird) => {
+        setSelectedBird(bird); // Set the selected bird
         await fetchUserLists(); // Fetch the latest lists every time the modal is opened
         setShowModal(true); // Open the modal to select a list
     };
 
-    const addBirdToList = async (listId, birdId) => {
-        if (!listId || !birdId) return;
+    const addBirdToList = async (listId, bird) => {
+        if (!listId || !bird) return;
 
         try {
             const birdsCollectionRef = collection(db, 'lists', listId, 'birds');
             await addDoc(birdsCollectionRef, {
-                birdId: birdId,
+                ...bird,
                 addedAt: serverTimestamp(),
             });
             console.log("Bird added to the list successfully");
@@ -94,13 +95,13 @@ const Search = () => {
     };
 
     const handleSearch = () => {
-        fetchData(); // Assuming fetchData makes the API call
+        setCurrentPage(0); // Set currentPage to start fetching from the first page
+        setShouldSearchManually(true); // Set shouldSearchManually state to true to trigger manual search
     };
 
-    // Function to handle key press in the search input
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
-            handleSearch(); // Call handleSearch when Enter is pressed
+            handleSearch();
         }
     };
 
@@ -127,14 +128,14 @@ const Search = () => {
         setSelectedBird(null); // Reset selected bird
     };
 
-    const handleAddBirdToList = async (birdId) => {
+    const handleAddBirdToList = async (bird) => {
         if (!selectedList) {
             alert("Please select a list first.");
             return;
         }
 
         try {
-            await addBirdToList(selectedList, birdId);
+            await addBirdToList(selectedList, bird);
             alert("Bird added successfully.");
             setShowModal(false);
             setSelectedBird(null);
@@ -149,7 +150,6 @@ const Search = () => {
 
     const [selectedBird, setSelectedBird] = useState(null);
 
-
     return (
         <Container maxW="container.xl" mt="40px" mb="40px">
             <Flex justify="space-between" align="center" mb="40px">
@@ -159,8 +159,8 @@ const Search = () => {
                     </InputLeftElement>
                     <Input
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)} // This updates the searchTerm state
-                        onKeyPress={handleKeyPress} // This handles the Enter press
+                        onChange={handleSearchChange}
+                        onKeyPress={handleKeyPress}
                         placeholder="Search by bird name"
                         size="lg"
                     />
@@ -177,54 +177,53 @@ const Search = () => {
                     )}
                 </InputGroup>
             </Flex>
-            <SimpleGrid spacing="40px" columns={{ base: 1, md: 2, xl: 3 }}>
-                {isLoading
-                    ? Array.from({ length: 3 }).map((_, index) => (
-                        <Box key={index}>
-                            <Card variant={'outline'}>
-                                <AspectRatio ratio={1 / 1.1}>
-                                    <Skeleton height="100%" width="100%" />
-                                </AspectRatio>
-                                <CardBody p="6">
-                                    <Stack align="start" spacing="2">
-                                        <Skeleton height="20px" width="70%" />
-                                        <Skeleton height="20px" width="50%" />
-                                    </Stack>
-                                </CardBody>
-                            </Card>
-                        </Box>
-                    ))
-                    : birds.map((bird, index) => (
-                        <Box key={index}>
-                            <Card variant={'outline'}>
-                                <AspectRatio ratio={1 / 1.1}>
-                                    <Image
-                                        src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
-                                        alt={bird.name}
-                                        objectFit="cover"
-                                        style={{ borderRadius: '5px 5px 0px 0px' }}
-                                    />
-                                </AspectRatio>
-                                <CardBody p="6">
-                                    <Stack align="start" spacing="2">
-                                        <Heading id="logo" as="h3" size="md" p="0">
-                                            {bird.name}
-                                        </Heading>
-                                        <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
-                                    </Stack>
-                                </CardBody>
-                                <CardFooter gap="10px" mt="-20px">
-                                    <Button variant='outline' colorScheme='gray' flex={1}>
-                                        Details
-                                    </Button>
-                                    <Button variant='outline' colorScheme='gray' flex={1} onClick={() => handleOpenModal(bird.id)}>Add</Button>
-                                </CardFooter>
-                            </Card>
-                        </Box>
-                    ))
-                }
-            </SimpleGrid>
-            {/* Modal for selecting list */}
+            {birds.length > 0 && (
+                <SimpleGrid spacing="40px" columns={{ base: 1, md: 2, xl: 3 }}>
+                    {isLoading
+                        ? Array.from({ length: 3 }).map((_, index) => (
+                            <Box key={index}>
+                                <Card variant={'outline'}>
+                                    <Skeleton height="300px" width="100%" />
+                                    <CardBody p="6">
+                                        <Stack align="start" spacing="2">
+                                            <Skeleton height="20px" width="70%" />
+                                            <Skeleton height="20px" width="50%" />
+                                        </Stack>
+                                    </CardBody>
+                                </Card>
+                            </Box>
+                        ))
+                        : birds.map((bird, index) => (
+                            <Box key={index}>
+                                <Card variant={'outline'}>
+                                    <AspectRatio ratio={1 / 1.1}>
+                                        <Image
+                                            src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
+                                            alt={bird.name}
+                                            objectFit="cover"
+                                            style={{ borderRadius: '5px 5px 0px 0px' }}
+                                        />
+                                    </AspectRatio>
+                                    <CardBody p="6">
+                                        <Stack align="start" spacing="2">
+                                            <Heading id="logo" as="h3" size="md" p="0">
+                                                {bird.name}
+                                            </Heading>
+                                            <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
+                                        </Stack>
+                                    </CardBody>
+                                    <CardFooter gap="10px" mt="-20px">
+                                        <Button variant='outline' colorScheme='gray' flex={1}>
+                                            Details
+                                        </Button>
+                                        <Button variant='outline' colorScheme='gray' flex={1} onClick={() => handleOpenModal(bird)}>Add</Button>
+                                    </CardFooter>
+                                </Card>
+                            </Box>
+                        ))
+                    }
+                </SimpleGrid>
+            )}
             <Modal isOpen={showModal} onClose={handleCloseModal}>
                 <ModalOverlay />
                 <ModalContent>
@@ -251,7 +250,6 @@ const Search = () => {
 
 export default Search;
 
-// Function to determine Tag color scheme based on conservation status
 const getColorScheme = (status) => {
     switch (status) {
         case 'Low Concern':
@@ -262,7 +260,7 @@ const getColorScheme = (status) => {
             return 'yellow';
         case 'Red Watch List':
             return 'red';
-        case '':
+        default:
             return 'gray';
     }
 }

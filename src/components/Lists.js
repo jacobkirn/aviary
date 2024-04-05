@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, where, getDocs, deleteDoc, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { Box, Button, Card, CardBody, CardFooter, Container, Stack, SimpleGrid, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, IconButton, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
+import { getFirestore, addDoc, collection, query, where, getDocs, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { Box, Button, Card, CardBody, SimpleGrid, CardFooter, Container, Stack, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, IconButton, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
 import { FaEllipsisV } from 'react-icons/fa';
 import { BiTrash } from 'react-icons/bi';
 
@@ -12,6 +12,16 @@ const Lists = ({ user }) => {
     const [selectedListId, setSelectedListId] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+    const fetchBirdsForList = async (listId) => {
+        const db = getFirestore();
+        const q = query(collection(db, 'lists', listId, 'birds'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+    };
+
     const fetchLists = async () => {
         if (!user) return;
 
@@ -19,10 +29,16 @@ const Lists = ({ user }) => {
         try {
             const q = query(collection(db, 'lists'), where('createdBy', '==', user.uid));
             const querySnapshot = await getDocs(q);
-            const listsData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+            const listsData = [];
+            for (const doc of querySnapshot.docs) {
+                const listData = {
+                    id: doc.id,
+                    ...doc.data(),
+                };
+                // Fetch and append bird data for the current list
+                listData.birds = await fetchBirdsForList(listData.id);
+                listsData.push(listData);
+            }
             setLists(listsData);
         } catch (error) {
             console.error('Error fetching lists:', error);
@@ -73,13 +89,34 @@ const Lists = ({ user }) => {
         <Container maxW="container.xl">
             <Button mt="40px" mb="40px" colorScheme="blue" onClick={() => setShowModal(true)} px={5} py={2}>Add New List</Button>
             <SimpleGrid spacing="40px" columns={{ base: 1, md: 2, xl: 3 }}>
-                {lists.map(list => (
+                {lists.map((list) => (
                     <Card key={list.id} variant={'outline'}>
                         <CardBody p="6">
                             <Stack align="start" spacing="2">
                                 <Heading as="h3" size="md" id="logo">{list.name}</Heading>
                                 <p>{list.description}</p>
                                 <p>{list.createdAt ? new Date(list.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
+                                {/* Display all bird data within the list */}
+                                {list.birds && list.birds.length > 0 ? (
+                                    <Box>
+                                        <Heading as="h4" size="sm" mb="2">Birds:</Heading>
+                                        <ul>
+                                            {list.birds.map((bird) => (
+                                                <li key={bird.id}>
+                                                    <p>Name: {bird.name}</p>
+                                                    <p>Family: {bird.family}</p>
+                                                    <p>Order: {bird.order}</p>
+                                                    <p>Status: {bird.status}</p>
+                                                    {/* Display other bird properties as needed */}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </Box>
+                                ) : (
+                                    <Box>
+                                        <p>No bird data available for this list.</p>
+                                    </Box>
+                                )}
                             </Stack>
                         </CardBody>
                         <CardFooter mt="-20px" gap="10px">

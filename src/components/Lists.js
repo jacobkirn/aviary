@@ -79,7 +79,7 @@ const Lists = ({ user }) => {
                             <Stack align="start" spacing="2">
                                 <Heading as="h3" size="md" id="logo">{list.name}</Heading>
                                 <p>{list.description}</p>
-                                <p>Created: {list.createdAt ? new Date(list.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
+                                <p>{list.createdAt ? new Date(list.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
                             </Stack>
                         </CardBody>
                         <CardFooter mt="-20px" gap="10px">

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, addDoc, collection, query, where, getDocs, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { Box, Button, Card, CardBody, SimpleGrid, CardFooter, Container, Stack, Heading, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, IconButton, Menu, MenuButton, MenuList, MenuItem, Icon } from '@chakra-ui/react';
+import {
+    AspectRatio, Box, Button, Card, Image, CardBody, SimpleGrid, Container, Heading, Tab, TabList, TabPanel, TabPanels, Tabs,
+    Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input,
+    Select, Flex,
+} from '@chakra-ui/react';
 import { FaEllipsisV } from 'react-icons/fa';
 import { BiTrash } from 'react-icons/bi';
 
@@ -9,8 +13,7 @@ const Lists = ({ user }) => {
     const [showModal, setShowModal] = useState(false);
     const [newListName, setNewListName] = useState('');
     const [newListDescription, setNewListDescription] = useState('');
-    const [selectedListId, setSelectedListId] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [selectedListId, setSelectedListId] = useState('');
 
     const fetchBirdsForList = async (listId) => {
         const db = getFirestore();
@@ -35,11 +38,13 @@ const Lists = ({ user }) => {
                     id: doc.id,
                     ...doc.data(),
                 };
-                // Fetch and append bird data for the current list
                 listData.birds = await fetchBirdsForList(listData.id);
                 listsData.push(listData);
             }
             setLists(listsData);
+            if (listsData.length > 0) {
+                setSelectedListId(listsData[0].id); // Select the first list by default
+            }
         } catch (error) {
             console.error('Error fetching lists:', error);
         }
@@ -68,72 +73,62 @@ const Lists = ({ user }) => {
     };
 
     const handleDeleteList = async () => {
+        if (!selectedListId) return;
+
         try {
             const db = getFirestore();
             await deleteDoc(doc(db, 'lists', selectedListId));
             fetchLists(); // Re-fetch lists to update the UI after deletion
         } catch (error) {
             console.error('Error deleting list:', error);
-        } finally {
-            setSelectedListId(null); // Reset selected list ID after deletion
-            setShowDeleteModal(false); // Close the delete confirmation modal
         }
     };
 
-    const openDeleteConfirmation = (listId) => {
-        setSelectedListId(listId);
-        setShowDeleteModal(true);
-    };
-
     return (
-        <Container maxW="container.xl">
-            <Button mt="40px" mb="40px" colorScheme="blue" onClick={() => setShowModal(true)} px={5} py={2}>Add New List</Button>
-            <SimpleGrid spacing="40px" columns={{ base: 1, md: 2, xl: 3 }}>
-                {lists.map((list) => (
-                    <Card key={list.id} variant={'outline'}>
-                        <CardBody p="6">
-                            <Stack align="start" spacing="2">
-                                <Heading as="h3" size="md" id="logo">{list.name}</Heading>
-                                <p>{list.description}</p>
-                                <p>{list.createdAt ? new Date(list.createdAt.seconds * 1000).toLocaleDateString() : 'Unknown'}</p>
-                                {/* Display all bird data within the list */}
-                                {list.birds && list.birds.length > 0 ? (
-                                    <Box>
-                                        <Heading as="h4" size="sm" mb="2">Birds:</Heading>
-                                        <ul>
-                                            {list.birds.map((bird) => (
-                                                <li key={bird.id}>
-                                                    <p>Name: {bird.name}</p>
-                                                    <p>Family: {bird.family}</p>
-                                                    <p>Order: {bird.order}</p>
-                                                    <p>Status: {bird.status}</p>
-                                                    {/* Display other bird properties as needed */}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </Box>
-                                ) : (
-                                    <Box>
-                                        <p>No bird data available for this list.</p>
-                                    </Box>
-                                )}
-                            </Stack>
-                        </CardBody>
-                        <CardFooter mt="-20px" gap="10px">
-                            <Button flex={1} variant='outline' size="sm" colorScheme="blue">View List</Button>
-                            <Menu placement="bottom-start">
-                                <MenuButton as={IconButton} aria-label="Options" icon={<FaEllipsisV transform="rotate(90)" />} colorScheme="gray" variant={'ghost'} size="sm" />
-                                <MenuList>
-                                    <MenuItem onClick={() => openDeleteConfirmation(list.id)} color="red.500">
-                                        <Icon as={BiTrash} mr={2} /> Delete
-                                    </MenuItem>
-                                </MenuList>
-                            </Menu>
-                        </CardFooter>
-                    </Card>
-                ))}
-            </SimpleGrid>
-            {/* Modal for adding new list */}
+        <Container maxW="container.xl" mt="40px" mb="40px">
+            <Box display="flex" alignItems="center" justifyContent={{ base: 'flex-start', md: 'space-between' }} flexWrap="wrap" mb="20px">
+                <Select size="lg" placeholder="Select List" value={selectedListId} style={{ paddingLeft: '10px', paddingRight: '10px' }} onChange={(e) => setSelectedListId(e.target.value)} maxW={{ base: '100%', md: '300px' }} mr={{ base: '0', md: '10px' }} mb={{ base: '10px', md: '0px' }}>
+                    {lists.map((list) => (
+                        <option key={list.id} value={list.id}>{list.name}</option>
+                    ))}
+                </Select>
+                <Flex flexWrap="wrap" justifyContent={{ base: 'flex-start', md: 'flex-start' }}>
+                    <Button size="lg" px="20px" mb={{ base: '10px', md: '0px' }} marginRight={{ base: '5px', md: '10px' }} onClick={() => setShowModal(true)}>Add New List</Button>
+                    <Button size="lg" px="20px" marginLeft={{ base: '5px', md: '10px' }} onClick={handleDeleteList}>Delete List</Button>
+                </Flex>
+            </Box>
+
+            <Tabs variant='soft-rounded' colorScheme='green' size='md'>
+                <TabPanels>
+                    {lists.map((list) => (
+                        <TabPanel key={list.id}>
+                            <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="40px" mt="40px">
+                                {list.birds && list.birds.length > 0 && list.birds.map((bird) => (
+                                    <Card key={bird.id} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
+                                        <AspectRatio ratio={1 / 1.1}>
+                                            <Image
+                                                src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
+                                                alt={bird.name}
+                                                objectFit="cover"
+                                                style={{ borderRadius: '5px 5px 0px 0px' }}
+                                            />
+                                        </AspectRatio>
+                                        <CardBody p="6">
+                                            <Heading as="h4" size="md">{bird.name}</Heading>
+                                            <p>Family: {bird.family}</p>
+                                            <p>Order: {bird.order}</p>
+                                            <p>Status: {bird.status}</p>
+                                            {/* Add other relevant bird properties */}
+                                        </CardBody>
+                                    </Card>
+                                ))}
+                            </SimpleGrid>
+                        </TabPanel>
+                    ))}
+                </TabPanels>
+            </Tabs>
+
+            {/* Add List Modal */}
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <ModalOverlay />
                 <ModalContent>
@@ -144,31 +139,14 @@ const Lists = ({ user }) => {
                             <FormLabel>List Name</FormLabel>
                             <Input value={newListName} onChange={(e) => setNewListName(e.target.value)} />
                         </FormControl>
-                        <FormControl mt="4">
+                        <FormControl mt={4}>
                             <FormLabel>List Description</FormLabel>
                             <Input value={newListDescription} onChange={(e) => setNewListDescription(e.target.value)} />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter>
-                        <Button colorScheme="blue" onClick={handleAddList}>Add</Button>
-                        <Button colorScheme="gray" ml={3} onClick={() => setShowModal(false)}>Cancel</Button>
-                    </ModalFooter>
-                </ModalContent>
-            </Modal>
-            {/* Modal for delete confirmation */}
-            <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalHeader>Delete List</ModalHeader>
-                    <ModalCloseButton />
-                    <ModalBody>
-                        <FormControl>
-                            <FormLabel>Are you sure you want to delete this list?</FormLabel>
-                        </FormControl>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button colorScheme="red" onClick={handleDeleteList}>Yes, Delete</Button>
-                        <Button colorScheme="gray" ml={3} onClick={() => setShowDeleteModal(false)}>Cancel</Button>
+                        <Button colorScheme="blue" mr={3} onClick={handleAddList}>Add</Button>
+                        <Button onClick={() => setShowModal(false)}>Cancel</Button>
                     </ModalFooter>
                 </ModalContent>
             </Modal>

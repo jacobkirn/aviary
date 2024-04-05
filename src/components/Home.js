@@ -40,7 +40,7 @@ export default class Home extends Component {
       <div>
         <Container maxW="container.xl" >
           <h2 id="welcome">Welcome, {firstName}.</h2>
-          <Tabs position="relative" variant="unstyled">
+          <Tabs size="lg" position="relative" variant="unstyled">
             <TabList>
               <Tab>Search</Tab>
               <Tab>Lists</Tab>

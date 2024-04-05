@@ -72,9 +72,9 @@ const Lists = ({ user }) => {
     return (
         <Container maxW="container.xl">
             <Button mt="40px" mb="40px" colorScheme="blue" onClick={() => setShowModal(true)} px={5} py={2}>Add New List</Button>
-            <SimpleGrid columns={3} spacing={6}>
+            <SimpleGrid spacing="40px" columns={{ base: 1, md: 2, xl: 3 }}>
                 {lists.map(list => (
-                    <Card key={list.id} variant={'outline'} maxWidth="400px">
+                    <Card key={list.id} variant={'outline'}>
                         <CardBody p="6">
                             <Stack align="start" spacing="2">
                                 <Heading as="h3" size="md" id="logo">{list.name}</Heading>
@@ -92,7 +92,6 @@ const Lists = ({ user }) => {
                                     </MenuItem>
                                 </MenuList>
                             </Menu>
-
                         </CardFooter>
                     </Card>
                 ))}

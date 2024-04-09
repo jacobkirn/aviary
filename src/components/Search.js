@@ -29,7 +29,9 @@ const Search = ({ onAddBird }) => {
     const [shouldSearchManually, setShouldSearchManually] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedBirdForDetails, setSelectedBirdForDetails] = useState(null);
-    const toast = useToast(); 
+    const [newListName, setNewListName] = useState('');
+    const [newListDescription, setNewListDescription] = useState('');
+    const toast = useToast();
 
 
     useEffect(() => {
@@ -62,6 +64,60 @@ const Search = ({ onAddBird }) => {
 
     const db = getFirestore();
 
+    const handleCreateListAndAddBird = async (bird) => {
+        if (!newListName.trim()) {
+            toast({
+                title: "Please provide a name for the new list.",
+                status: "warning",
+                duration: 5000
+            });
+            return;
+        }
+
+        try {
+            const db = getFirestore();
+            // Create a new list
+            const listRef = await addDoc(collection(db, 'lists'), {
+                name: newListName,
+                description: newListDescription,
+                createdBy: auth.currentUser.uid,
+                createdAt: serverTimestamp(),
+            });
+
+            // Add the bird to the new list
+            await addDoc(collection(db, 'lists', listRef.id, 'birds'), {
+                ...bird,
+                addedAt: serverTimestamp(),
+            });
+
+            toast({
+                title: `${bird.name} has been successfully added to the new list "${newListName}".`,
+                status: "success",
+                duration: 5000
+            });
+
+            // Optionally, re-fetch lists to reflect the update
+            fetchUserLists();
+            setShowModal(false); // Close the modal after adding
+            setNewListName(''); // Reset the new list form fields
+            setNewListDescription('');
+
+            // Call the onAddBird callback to trigger list refresh in Home component
+            onAddBird();
+
+        } catch (error) {
+            console.error("Error creating list and adding bird:", error);
+            toast({
+                title: "Error creating list and adding bird.",
+                description: error.message,
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
+        }
+    };
+
+
     const handleOpenModal = async (bird) => {
         setSelectedBird(bird); // Set the selected bird
         await fetchUserLists(); // Fetch the latest lists every time the modal is opened
@@ -70,39 +126,39 @@ const Search = ({ onAddBird }) => {
 
     const addBirdToList = async (listId, bird) => {
         if (!listId || !bird) return;
-      
+
         try {
-          const birdsCollectionRef = collection(db, 'lists', listId, 'birds');
-          await addDoc(birdsCollectionRef, {
-              ...bird,
-              addedAt: serverTimestamp(),
-          });
-          // Show success toast
-          toast({
-              title: `${bird.name} has been successfully added.`,
-              status: "success",
-              duration: 5000
-          });
-          // Optionally, re-fetch lists to reflect the update
-          fetchUserLists();
-          // Close the modal and/or drawer if open
-          setShowModal(false);
-          setIsDrawerOpen(false);
-    
-          // Call the onAddBird callback to trigger list refresh in Home component
-          onAddBird();
+            const birdsCollectionRef = collection(db, 'lists', listId, 'birds');
+            await addDoc(birdsCollectionRef, {
+                ...bird,
+                addedAt: serverTimestamp(),
+            });
+            // Show success toast
+            toast({
+                title: `${bird.name} has been successfully added.`,
+                status: "success",
+                duration: 5000
+            });
+            // Optionally, re-fetch lists to reflect the update
+            fetchUserLists();
+            // Close the modal and/or drawer if open
+            setShowModal(false);
+            setIsDrawerOpen(false);
+
+            // Call the onAddBird callback to trigger list refresh in Home component
+            onAddBird();
         } catch (error) {
-          console.error("Error adding bird to list:", error);
-          // Optionally, show an error toast
-          toast({
-              title: "Error adding bird to list.",
-              description: "An error occurred while trying to add the bird to your list.",
-              status: "error",
-              duration: 9000,
-              isClosable: true,
-          });
+            console.error("Error adding bird to list:", error);
+            // Optionally, show an error toast
+            toast({
+                title: "Error adding bird to list.",
+                description: "An error occurred while trying to add the bird to your list.",
+                status: "error",
+                duration: 9000,
+                isClosable: true,
+            });
         }
-      };
+    };
 
     const fetchData = async () => {
         try {
@@ -215,7 +271,7 @@ const Search = ({ onAddBird }) => {
                 </InputGroup>
             </Flex>
             {birds.length > 0 && (
-                <SimpleGrid spacing="40px" columns={{ base: 1, md: 2, xl: 3 }}>
+                <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
                     {isLoading
                         ? Array.from({ length: 3 }).map((_, index) => (
                             <Box key={index}>
@@ -232,7 +288,7 @@ const Search = ({ onAddBird }) => {
                         ))
                         : birds.map((bird, index) => (
                             <Box key={index}>
-                                <Card variant={'outline'}>
+                                <Card variant={'outline'} mt={{ base: '-20px', md: '0px' }}>
                                     <AspectRatio ratio={1 / 1.1}>
                                         <Image
                                             src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
@@ -267,17 +323,34 @@ const Search = ({ onAddBird }) => {
                     <ModalHeader>Add Bird to List</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormControl>
-                            <FormLabel>Select a list:</FormLabel>
-                            <Select placeholder="Select list" value={selectedList} onChange={handleSelectList}>
-                                {lists.map(list => (
-                                    <option key={list.id} value={list.id}>{list.name}</option>
-                                ))}
-                            </Select>
-                        </FormControl>
+                        {lists.length > 0 ? (
+                            <FormControl>
+                                <FormLabel>Select a list:</FormLabel>
+                                <Select placeholder="Select list" value={selectedList} onChange={handleSelectList}>
+                                    {lists.map(list => (
+                                        <option key={list.id} value={list.id}>{list.name}</option>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        ) : (
+                            <>
+                                <FormControl>
+                                    <FormLabel>New list name</FormLabel>
+                                    <Input value={newListName} onChange={(e) => setNewListName(e.target.value)} />
+                                </FormControl>
+                                <FormControl mt={4}>
+                                    <FormLabel>New list description (optional)</FormLabel>
+                                    <Input value={newListDescription} onChange={(e) => setNewListDescription(e.target.value)} />
+                                </FormControl>
+                            </>
+                        )}
                     </ModalBody>
                     <ModalFooter>
-                        <Button colorScheme="blue" onClick={handleAddToList}>Add to List</Button>
+                        {lists.length > 0 ? (
+                            <Button colorScheme="blue" onClick={() => handleAddToList(selectedList, selectedBird)}>Add to List</Button>
+                        ) : (
+                            <Button colorScheme="blue" onClick={() => handleCreateListAndAddBird(selectedBird)}>Create List & Add Bird</Button>
+                        )}
                     </ModalFooter>
                 </ModalContent>
             </Modal>
@@ -289,8 +362,8 @@ const Search = ({ onAddBird }) => {
             >
                 <DrawerOverlay />
                 <DrawerContent>
-                    <DrawerCloseButton m={2} />
-                    <DrawerHeader>Bird Details</DrawerHeader>
+                    <DrawerCloseButton m={3} />
+                    <DrawerHeader mt={1}>Bird Details</DrawerHeader>
                     <DrawerBody>
                         {selectedBirdForDetails ? (
                             <>
@@ -299,9 +372,8 @@ const Search = ({ onAddBird }) => {
                                     alt={displayValueOrPlaceholder(selectedBirdForDetails.name)}
                                     objectFit="cover"
                                     borderRadius="md"
-                                    mt={-1}
                                     mb="20px"
-                                    h="400"
+                                    h="500"
                                     w="100%"
                                 />
                                 <Heading as="h4" size="sm">Name</Heading>

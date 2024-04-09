@@ -19,6 +19,8 @@ const Lists = ({ user, refreshLists }) => {
     const [selectedListId, setSelectedListId] = useState('');
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [listToDelete, setListToDelete] = useState(null);
+    const [showBirdDeleteConfirmModal, setShowBirdDeleteConfirmModal] = useState(false);
+    const [birdToDelete, setBirdToDelete] = useState({ listId: '', birdDocId: '' });
     const toast = useToast();
 
     const fetchListsAndBirds = async () => {
@@ -36,9 +38,9 @@ const Lists = ({ user, refreshLists }) => {
                 };
                 // Fetch birds for each list
                 const birdsSnapshot = await getDocs(collection(db, 'lists', doc.id, 'birds'));
-                listData.birds = birdsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
+                listData.birds = birdsSnapshot.docs.map(birdDoc => ({
+                    docId: birdDoc.id, // This is the Firestore document ID.
+                    ...birdDoc.data(),
                 }));
                 listsData.push(listData);
             }
@@ -132,6 +134,36 @@ const Lists = ({ user, refreshLists }) => {
             setShowConfirmModal(false);
         }
     };
+
+    const removeBirdFromList = async () => {
+        const { listId, birdDocId } = birdToDelete;
+        if (!listId || !birdDocId) return;
+
+        const db = getFirestore();
+        const birdDocRef = doc(db, `lists/${listId}/birds/${birdDocId}`);
+
+        try {
+            await deleteDoc(birdDocRef);
+            console.log("Bird successfully deleted from the list.");
+            toast({
+                title: "Bird deleted successfully.",
+                description: "The bird has been removed from the list.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+            fetchListsAndBirds(); // Re-fetch to update UI
+            setShowBirdDeleteConfirmModal(false); // Close confirmation modal
+        } catch (error) {
+            console.error("Error removing bird from list:", error);
+        }
+    };
+
+    const promptDeleteBird = (listId, birdDocId) => {
+        setBirdToDelete({ listId, birdDocId });
+        setShowBirdDeleteConfirmModal(true);
+    };
+
 
     if (lists.length === 0) {
         return (
@@ -237,7 +269,11 @@ const Lists = ({ user, refreshLists }) => {
                                 <Button variant='outline' colorScheme='gray' flex={1}>
                                     Details
                                 </Button>
-                                <Button variant='outline' colorScheme='gray' flex={1}>Remove</Button>
+                                {list.birds.map((bird) => (
+                                    <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(list.id, bird.docId)}>
+                                        Remove
+                                    </Button>
+                                ))}
                             </CardFooter>
                         </Card>
                     ))}
@@ -282,7 +318,22 @@ const Lists = ({ user, refreshLists }) => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-
+            <Modal isOpen={showBirdDeleteConfirmModal} onClose={() => setShowBirdDeleteConfirmModal(false)}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Confirm Bird Deletion</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody>
+                        Are you sure you want to delete this bird from the list? This action cannot be undone.
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button colorScheme="red" mr={3} onClick={removeBirdFromList}>
+                            Delete Bird
+                        </Button>
+                        <Button variant="ghost" onClick={() => setShowBirdDeleteConfirmModal(false)}>Cancel</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </Container>
     );
 };

@@ -4,7 +4,9 @@ import {
     InputRightElement, Flex, Skeleton, AspectRatio, Stack, Tag, Card,
     CardBody, CardFooter, InputGroup, InputLeftElement, Modal, ModalOverlay,
     ModalContent, ModalHeader, IconButton, ModalFooter, ModalBody,
-    ModalCloseButton, FormControl, FormLabel, Select
+    ModalCloseButton, FormControl, FormLabel, Select, Drawer,
+    DrawerBody, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerContent,
+    DrawerCloseButton, Text, useToast
 } from '@chakra-ui/react';
 import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
 import axios from 'axios';
@@ -12,7 +14,7 @@ import { getFirestore, collection, query, where, getDocs } from 'firebase/firest
 import { doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '../firebase';
 
-const Search = () => {
+const Search = ({ onAddBird }) => {
     const [birds, setBirds] = useState([]);
     const [currentPage, setCurrentPage] = useState(null); // Initialize with null
     const [totalPages, setTotalPages] = useState(1);
@@ -25,6 +27,10 @@ const Search = () => {
     const pageSize = 24; // Number of birds to fetch per page
     const apiKey = '7d077ea8-7b2e-4a97-abee-a56aaf551f2a';
     const [shouldSearchManually, setShouldSearchManually] = useState(false);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedBirdForDetails, setSelectedBirdForDetails] = useState(null);
+    const toast = useToast(); 
+
 
     useEffect(() => {
         fetchUserLists();
@@ -64,18 +70,39 @@ const Search = () => {
 
     const addBirdToList = async (listId, bird) => {
         if (!listId || !bird) return;
-
+      
         try {
-            const birdsCollectionRef = collection(db, 'lists', listId, 'birds');
-            await addDoc(birdsCollectionRef, {
-                ...bird,
-                addedAt: serverTimestamp(),
-            });
-            console.log("Bird added to the list successfully");
+          const birdsCollectionRef = collection(db, 'lists', listId, 'birds');
+          await addDoc(birdsCollectionRef, {
+              ...bird,
+              addedAt: serverTimestamp(),
+          });
+          // Show success toast
+          toast({
+              title: `${bird.name} has been successfully added.`,
+              status: "success",
+              duration: 5000
+          });
+          // Optionally, re-fetch lists to reflect the update
+          fetchUserLists();
+          // Close the modal and/or drawer if open
+          setShowModal(false);
+          setIsDrawerOpen(false);
+    
+          // Call the onAddBird callback to trigger list refresh in Home component
+          onAddBird();
         } catch (error) {
-            console.error("Error adding bird to list:", error);
+          console.error("Error adding bird to list:", error);
+          // Optionally, show an error toast
+          toast({
+              title: "Error adding bird to list.",
+              description: "An error occurred while trying to add the bird to your list.",
+              status: "error",
+              duration: 9000,
+              isClosable: true,
+          });
         }
-    };
+      };
 
     const fetchData = async () => {
         try {
@@ -145,6 +172,16 @@ const Search = () => {
         }
     };
 
+    const displayValueOrPlaceholder = (value, placeholder = "No Data Available") =>
+        value ? value : placeholder;
+
+
+    const handleOpenDrawer = (bird) => {
+        setSelectedBirdForDetails(bird);
+        setIsDrawerOpen(true);
+    };
+
+
     const handleSearchChange = (e) => setSearchTerm(e.target.value);
     const clearSearch = () => setSearchTerm('');
 
@@ -213,7 +250,7 @@ const Search = () => {
                                         </Stack>
                                     </CardBody>
                                     <CardFooter gap="10px" mt="-20px">
-                                        <Button variant='outline' colorScheme='gray' flex={1}>
+                                        <Button variant='outline' colorScheme='gray' flex={1} onClick={() => handleOpenDrawer(bird)}>
                                             Details
                                         </Button>
                                         <Button variant='outline' colorScheme='gray' flex={1} onClick={() => handleOpenModal(bird)}>Add</Button>
@@ -244,6 +281,67 @@ const Search = () => {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
+            <Drawer
+                isOpen={isDrawerOpen}
+                placement="right"
+                onClose={() => setIsDrawerOpen(false)}
+                size="md" // You can adjust the size as needed
+            >
+                <DrawerOverlay />
+                <DrawerContent>
+                    <DrawerCloseButton m={2} />
+                    <DrawerHeader>Bird Details</DrawerHeader>
+                    <DrawerBody>
+                        {selectedBirdForDetails ? (
+                            <>
+                                <Image
+                                    src={selectedBirdForDetails.images && selectedBirdForDetails.images.length > 0 ? selectedBirdForDetails.images[0] : 'https://via.placeholder.com/150'}
+                                    alt={displayValueOrPlaceholder(selectedBirdForDetails.name)}
+                                    objectFit="cover"
+                                    borderRadius="md"
+                                    mt={-1}
+                                    mb="20px"
+                                    h="400"
+                                    w="100%"
+                                />
+                                <Heading as="h4" size="sm">Name</Heading>
+                                <Text id="drawer-data">{displayValueOrPlaceholder(selectedBirdForDetails.name)}</Text>
+                                <Heading as="h4" size="sm">Scientific Name</Heading>
+                                <Text id="drawer-data">{displayValueOrPlaceholder(selectedBirdForDetails.sciName)}</Text>
+                                <Heading as="h4" size="sm">Order</Heading>
+                                <Text id="drawer-data">{displayValueOrPlaceholder(selectedBirdForDetails.order)}</Text>
+                                <Heading as="h4" size="sm">Family</Heading>
+                                <Text id="drawer-data">{displayValueOrPlaceholder(selectedBirdForDetails.family)}</Text>
+                                <Heading as="h4" size="sm">Status</Heading>
+                                <Text id="drawer-data">{displayValueOrPlaceholder(selectedBirdForDetails.status)}</Text>
+                                <Heading as="h4" size="sm">Region(s)</Heading>
+                                <Text id="drawer-data">{selectedBirdForDetails.region && selectedBirdForDetails.region.length > 0 ? selectedBirdForDetails.region.join(', ') : "No Data Available"}</Text>
+                                <Heading as="h4" size="sm">Wingspan</Heading>
+                                <Text id="drawer-data">{selectedBirdForDetails.wingspanMin && selectedBirdForDetails.wingspanMax ? `${selectedBirdForDetails.wingspanMin} - ${selectedBirdForDetails.wingspanMax} cm` : "No Data Available"}</Text>
+                                <Heading as="h4" size="sm">Length</Heading>
+                                <Text id="drawer-data">{selectedBirdForDetails.lengthMin && selectedBirdForDetails.lengthMax ? `${selectedBirdForDetails.lengthMin} - ${selectedBirdForDetails.lengthMax} cm` : "No Data Available"}</Text>
+                            </>
+                        ) : (
+                            <Text>No bird selected</Text>
+                        )}
+                    </DrawerBody>
+                    <DrawerFooter>
+                        <Flex width="full"> {/* Ensure the Flex container takes up the full width */}
+                            <Button
+                                colorScheme='blue'
+                                width="full" // Ensure the button takes up the full width of its Flex container
+                                onClick={() => {
+                                    handleOpenModal(selectedBirdForDetails);
+                                    setIsDrawerOpen(false);
+                                }}
+                            >
+                                Add to List
+                            </Button>
+                        </Flex>
+                    </DrawerFooter>
+
+                </DrawerContent>
+            </Drawer>
         </Container>
     );
 };

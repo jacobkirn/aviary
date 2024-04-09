@@ -17,7 +17,8 @@ export default class Home extends Component {
     super(props);
     this.state = {
       firstName: '',
-      user: null
+      user: null,
+      refreshLists: false // Add this line
     };
   }
 
@@ -34,8 +35,13 @@ export default class Home extends Component {
     }
   }
 
+  // Add a method to toggle refresh
+  triggerListRefresh = () => {
+    this.setState(prevState => ({ refreshLists: !prevState.refreshLists }));
+  }
+
   render() {
-    const { firstName, user } = this.state;
+    const { firstName, user, refreshLists } = this.state;
     return (
       <div>
         <Container maxW="container.xl" >
@@ -53,11 +59,10 @@ export default class Home extends Component {
             />
             <TabPanels>
               <TabPanel>
-                {/* Pass the user prop to the Lists component */}
-                <Lists user={user} />
+                <Lists user={user} refreshLists={refreshLists} />
               </TabPanel>
               <TabPanel>
-                <Search />
+                <Search user={user} onAddBird={this.triggerListRefresh} />
               </TabPanel>
             </TabPanels>
           </Tabs>

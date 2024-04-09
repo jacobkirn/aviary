@@ -8,7 +8,7 @@ import {
 import { FaEllipsisV } from 'react-icons/fa';
 import { BiTrash } from 'react-icons/bi';
 
-const Lists = ({ user }) => {
+const Lists = ({ user, refreshLists }) => {
     const [lists, setLists] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newListName, setNewListName] = useState('');
@@ -38,13 +38,11 @@ const Lists = ({ user }) => {
                     id: doc.id,
                     ...doc.data(),
                 };
+                // Assuming fetchBirdsForList is defined and fetches birds for each list
                 listData.birds = await fetchBirdsForList(listData.id);
                 listsData.push(listData);
             }
             setLists(listsData);
-            if (listsData.length > 0) {
-                setSelectedListId(listsData[0].id); // Select the first list by default
-            }
         } catch (error) {
             console.error('Error fetching lists:', error);
         }
@@ -52,7 +50,7 @@ const Lists = ({ user }) => {
 
     useEffect(() => {
         fetchLists();
-    }, [user]);
+    }, [user, refreshLists]); // React to changes in refreshLists prop
 
     const handleAddList = async () => {
         try {

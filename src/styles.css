@@ -39,6 +39,15 @@
     font-style: normal;
 }
 
+#drawer-data {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 32px;
+    margin-bottom: 20px;
+}
+
 .css-a5mhaz {
     --chakra-space-4: 0px;
 }

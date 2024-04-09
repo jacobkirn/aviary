@@ -172,7 +172,7 @@ const Lists = ({ user, refreshLists }) => {
                     <img src={NoList} width={"400px"} />
                 </Flex>
                 <Text fontSize="xl" mb="4">You currently have no lists.</Text>
-                <Button leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" px="20px" onClick={() => setShowModal(true)}>
+                <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" px="20px" onClick={() => setShowModal(true)}>
                     Create New List
                 </Button>
 
@@ -250,7 +250,7 @@ const Lists = ({ user, refreshLists }) => {
             {lists.map((list) => (
                 <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="40px">
                     {list.birds && list.birds.length > 0 && list.birds.map((bird) => (
-                        <Card key={bird.id} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
+                        <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
                             <AspectRatio ratio={1 / 1.1}>
                                 <Image
                                     src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
@@ -269,11 +269,10 @@ const Lists = ({ user, refreshLists }) => {
                                 <Button variant='outline' colorScheme='gray' flex={1}>
                                     Details
                                 </Button>
-                                {list.birds.map((bird) => (
-                                    <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(list.id, bird.docId)}>
-                                        Remove
-                                    </Button>
-                                ))}
+                                {/* Corrected part: Directly use bird's information here without mapping */}
+                                <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(list.id, bird.docId)}>
+                                    Remove
+                                </Button>
                             </CardFooter>
                         </Card>
                     ))}

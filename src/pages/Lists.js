@@ -182,7 +182,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
     if (lists.length === 0) {
         return (
             <Container maxW="container.xl" mt="40px" mb="40px" textAlign="center">
-                <Flex mb="40px" mt="80px" justifyContent={"center"}>
+                <Flex mb="20px" mt="80px" justifyContent={"center"}>
                     <img src={NoList} width={"250px"} />
                 </Flex>
                 <Text id="no-list" fontSize="xl">You don't have any lists... yet.</Text>
@@ -303,8 +303,9 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                                     </Heading>
                                     <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
                                 </CardBody>
-                                <CardFooter gap="10px" mt="-20px">
+                                <CardFooter gap="10px" mt="-24px">
                                     <Button
+                                        m="1"
                                         variant='outline'
                                         colorScheme='gray'
                                         flex={1}
@@ -312,7 +313,11 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                                     >
                                         Details
                                     </Button>
-                                    <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(selectedListId, bird.docId)}>
+                                    <Button m="1"
+                                        variant='outline'
+                                        colorScheme='gray'
+                                        flex={1}
+                                        onClick={() => promptDeleteBird(selectedListId, bird.docId)}>
                                         Remove
                                     </Button>
                                 </CardFooter>
@@ -322,10 +327,10 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                 ) : (
                     // Empty state for when the selected list has no birds
                     <Flex direction="column" align="center" justify="center" mt="80px">
-                        <Flex mb="40px" justifyContent={"center"}>
+                        <Flex mb="20px" justifyContent={"center"}>
                             <img src={NoBird} width={"250px"} />
                         </Flex>
-                        <Text id="no-list" fontSize="xl">Go add some birds!</Text>
+                        <Text id="no-list" fontSize="xl">No birds here. Try adding some!</Text>
                         <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" onClick={onAddBirdsClick}>
                             Add Birds
                         </Button>

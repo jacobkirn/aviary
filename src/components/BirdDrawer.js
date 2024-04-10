@@ -3,6 +3,7 @@ import {
     Button, Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerOverlay, DrawerContent,
     DrawerCloseButton, Image, Text, Heading, Flex
 } from '@chakra-ui/react';
+import { FaGoogle } from 'react-icons/fa';
 
 const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick, showAddToListButton }) => {
     const displayValueOrPlaceholder = (value, placeholder = "No Data Available") =>
@@ -28,11 +29,22 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                                 alt={displayValueOrPlaceholder(selectedBirdForDetails.name)}
                                 objectFit="cover"
                                 borderRadius="md"
-                                mb="20px"
-                                h="400"
+                                mb="0px"
+                                h="500"
                                 w="100%"
                             />
-                            <Button colorScheme="gray" size="lg" width="full" mt="-20" borderRadius={'0px 0px 0.375rem 0.375rem'} mb="20px" onClick={handleGoogleImageSearch}>
+                            <Button leftIcon={<FaGoogle />}
+                                bg="#eeeeee"
+                                color="#000000"
+                                _hover={{ bg: '#dddddd' }}
+                                _active={{
+                                    bg: '#cccccc',
+                                }}
+                                size="lg"
+                                width="full"
+                                mt="-76px"
+                                borderRadius={'0px'}
+                                onClick={handleGoogleImageSearch}>
                                 Search Google Images
                             </Button>
                             <Heading as="h4" size="sm">Name</Heading>

@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  Box, Image, Heading, Stack, Tag, Card, CardBody, CardFooter, Button, AspectRatio
+    Box, Image, Heading, Stack, Tag, Card, CardBody, CardFooter, Button, AspectRatio
 } from '@chakra-ui/react';
 
 const getColorScheme = (status) => {
@@ -35,10 +35,10 @@ const BirdCard = ({ bird, onDetailsClick, onAddClick }) => (
                 </Stack>
             </CardBody>
             <CardFooter gap="10px" mt="-24px">
-                <Button variant='outline' colorScheme='gray' flex={1} onClick={() => onDetailsClick(bird)}>
+                <Button m="1" variant='outline' colorScheme='gray' flex={1} onClick={() => onDetailsClick(bird)}>
                     Details
                 </Button>
-                <Button variant='outline' colorScheme='gray' flex={1} onClick={() => onAddClick(bird)}>
+                <Button m="1" variant='outline' colorScheme='gray' flex={1} onClick={() => onAddClick(bird)}>
                     Add
                 </Button>
             </CardFooter>

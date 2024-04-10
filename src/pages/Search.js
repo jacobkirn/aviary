@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import {
     Button, Container, Input, SimpleGrid, Box, Image, Heading,
-    InputRightElement, Flex, Skeleton, AspectRatio, Stack, Tag, Card,
-    CardBody, CardFooter, InputGroup, InputLeftElement, IconButton, useToast
+    InputRightElement, Flex, Spinner, AspectRatio, Stack, Tag, Card,
+    CardBody, CardFooter, InputGroup, InputLeftElement, Text, IconButton, useToast
 } from '@chakra-ui/react';
 import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '../firebase';
+import NoBird from '../images/no-search.png';
 import AddBirdModal from '../components/AddBirdModal';
 import BirdDrawer from '../components/BirdDrawer';
 import BirdCard from '../components/BirdCard';
@@ -31,7 +32,6 @@ const Search = ({ onAddBird }) => {
     const [newListName, setNewListName] = useState('');
     const [newListDescription, setNewListDescription] = useState('');
     const toast = useToast();
-
 
     useEffect(() => {
         fetchUserLists();
@@ -67,13 +67,13 @@ const Search = ({ onAddBird }) => {
 
     const handleCreateListAndAddBird = async (bird) => {
         if (!newListName.trim()) {
-          toast({
-            title: "Name required",
-            description: "Please provide a name for the new list.",
-            status: "warning",
-            duration: 5000
-          });
-          return;
+            toast({
+                title: "Name required",
+                description: "Please provide a name for the new list.",
+                status: "warning",
+                duration: 5000
+            });
+            return;
         }
 
         try {
@@ -100,7 +100,7 @@ const Search = ({ onAddBird }) => {
 
             fetchUserLists();
             setShowModal(false);
-            setNewListName(''); 
+            setNewListName('');
             setNewListDescription('');
             onAddBird();
 
@@ -199,7 +199,7 @@ const Search = ({ onAddBird }) => {
         }
 
         await addBirdToList(selectedList, selectedBird);
-        setShowModal(false); 
+        setShowModal(false);
         setSelectedBird(null);
     };
 
@@ -223,7 +223,6 @@ const Search = ({ onAddBird }) => {
     const displayValueOrPlaceholder = (value, placeholder = "No Data Available") =>
         value ? value : placeholder;
 
-
     const handleOpenDrawer = (bird) => {
         setSelectedBirdForDetails(bird);
         setIsDrawerOpen(true);
@@ -235,7 +234,13 @@ const Search = ({ onAddBird }) => {
     };
 
     const handleSearchChange = (e) => setSearchTerm(e.target.value);
-    const clearSearch = () => setSearchTerm('');
+    const clearSearch = () => {
+        setSearchTerm('');
+        setCurrentPage(null);
+        setBirds([]);
+        // Optionally, you might also want to reset the loading state and other related states if needed
+        setIsLoading(false);
+    };
 
     const [selectedBird, setSelectedBird] = useState(null);
 
@@ -247,7 +252,11 @@ const Search = ({ onAddBird }) => {
             <Flex justify="space-between" align="center" mb="40px">
                 <InputGroup size='lg'>
                     <InputLeftElement pointerEvents="none">
-                        <SearchIcon color="gray.300" />
+                        {isLoading ? (
+                            <Spinner size="sm" color="blue.500" />
+                        ) : (
+                            <SearchIcon color="gray.300" />
+                        )}
                     </InputLeftElement>
                     <Input
                         value={searchTerm}
@@ -270,33 +279,23 @@ const Search = ({ onAddBird }) => {
                 </InputGroup>
             </Flex>
 
-            {/* Birds Listing */}
-
-            {birds.length > 0 && (
+            {/* Birds Listing or Empty State */}
+            {currentPage === null || birds.length === 0 ? (
+                <Flex direction="column" align="center" justify="center" mt="80px">
+                    <Flex mb="40px" justifyContent={"center"}>
+                        <Image src={NoBird} width={"300px"} />
+                    </Flex>
+                </Flex>
+            ) : (
                 <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
-                    {isLoading
-                        ? Array.from({ length: 3 }).map((_, index) => (
-                            <Box key={index}>
-                                <Card variant={'outline'}>
-                                    <Skeleton height="300px" width="100%" />
-                                    <CardBody p="6">
-                                        <Stack align="start" spacing="2">
-                                            <Skeleton height="20px" width="70%" />
-                                            <Skeleton height="20px" width="50%" />
-                                        </Stack>
-                                    </CardBody>
-                                </Card>
-                            </Box>
-                        ))
-                        : birds.map((bird, index) => (
-                            <BirdCard
-                                key={index}
-                                bird={bird}
-                                onDetailsClick={() => handleOpenDrawer(bird)}
-                                onAddClick={() => handleOpenModal(bird)}
-                            />
-                        ))
-                    }
+                    {birds.map((bird, index) => (
+                        <BirdCard
+                            key={index}
+                            bird={bird}
+                            onDetailsClick={() => handleOpenDrawer(bird)}
+                            onAddClick={() => handleOpenModal(bird)}
+                        />
+                    ))}
                 </SimpleGrid>
             )}
 

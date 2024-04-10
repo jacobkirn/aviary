@@ -16,7 +16,7 @@ import BirdCard from '../components/BirdCard';
 const Search = ({ onAddBird }) => {
     const [birds, setBirds] = useState([]);
     const [currentPage, setCurrentPage] = useState(null);
-    const [setTotalPages] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showModal, setShowModal] = useState(false);

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from 'react';
 import { auth } from '../firebase';
 import {
   Container,
@@ -18,8 +18,16 @@ export default class Home extends Component {
     this.state = {
       firstName: '',
       user: null,
-      refreshLists: false // Add this line
+      refreshLists: false,
+      tabIndex: 0, // Add this line to track the active tab
     };
+    this.searchInputRef = createRef(); // Create a ref for the Search input
+  }
+
+  changeTabAndFocusSearch = () => {
+    this.setState({ tabIndex: 1 }, () => {
+      this.searchInputRef.current && this.searchInputRef.current.focusInput();
+    });
   }
 
   componentDidMount() {
@@ -40,13 +48,26 @@ export default class Home extends Component {
     this.setState(prevState => ({ refreshLists: !prevState.refreshLists }));
   }
 
+  changeTabAndFocusSearch = () => {
+    this.setState({ tabIndex: 1 }, () => {
+      // Assuming the Search component properly exposes a focusInput method via forwarded ref
+      this.searchInputRef.current && this.searchInputRef.current.focusInput();
+    });
+  }
+
+  handleAddBird = () => {
+    // Logic to handle after a bird is added
+    console.log('Bird added!');
+    this.triggerListRefresh(); // Assuming you want to refresh lists after adding a bird
+  }
+
   render() {
     const { firstName, user, refreshLists } = this.state;
     return (
       <div>
         <Container maxW="container.xl" >
           <h2 id="welcome">Welcome, {firstName}.</h2>
-          <Tabs size="lg" position="relative" variant="unstyled">
+          <Tabs index={this.state.tabIndex} onChange={(index) => this.setState({ tabIndex: index })} size="lg" position="relative" variant="unstyled">
             <TabList>
               <Tab>Lists</Tab>
               <Tab>Search</Tab>
@@ -59,10 +80,12 @@ export default class Home extends Component {
             />
             <TabPanels>
               <TabPanel>
-                <Lists user={user} refreshLists={refreshLists} />
+                <Lists user={user} refreshLists={refreshLists} onAddBirdsClick={this.changeTabAndFocusSearch} />
               </TabPanel>
               <TabPanel>
-                <Search user={user} onAddBird={this.triggerListRefresh} />
+                <TabPanel>
+                  <Search user={user} ref={this.searchInputRef} onAddBird={this.handleAddBird} />
+                </TabPanel>
               </TabPanel>
             </TabPanels>
           </Tabs>

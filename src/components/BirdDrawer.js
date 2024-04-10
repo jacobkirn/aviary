@@ -8,6 +8,12 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
     const displayValueOrPlaceholder = (value, placeholder = "No Data Available") =>
         value ? value : placeholder;
 
+    const handleGoogleImageSearch = () => {
+        const query = encodeURIComponent(selectedBirdForDetails.name);
+        const url = `https://www.google.com/search?tbm=isch&q=${query}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <Drawer isOpen={isOpen} placement="right" onClose={onClose} size={{ base: 'sm', md: 'md' }}>
             <DrawerOverlay />
@@ -26,6 +32,9 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                                 h="400"
                                 w="100%"
                             />
+                            <Button colorScheme="gray" size="lg" width="full" mt="-20" borderRadius={'0px 0px 0.375rem 0.375rem'} mb="20px" onClick={handleGoogleImageSearch}>
+                                Search Google Images
+                            </Button>
                             <Heading as="h4" size="sm">Name</Heading>
                             <Text id="drawer-data">{displayValueOrPlaceholder(selectedBirdForDetails.name)}</Text>
                             <Heading as="h4" size="sm">Scientific Name</Heading>

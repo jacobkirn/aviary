@@ -9,11 +9,12 @@ import { FaPlus } from 'react-icons/fa';
 import { BiTrash } from "react-icons/bi";
 import { IoMdAdd } from "react-icons/io"; // Corrected import
 import NoList from '../images/no-list.png';
+import NoBird from '../images/no-birds.png';
 import { format } from 'date-fns';
 import BirdDrawer from '../components/BirdDrawer';
 
 
-const Lists = ({ user, refreshLists }) => {
+const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
     const [lists, setLists] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newListName, setNewListName] = useState('');
@@ -181,10 +182,10 @@ const Lists = ({ user, refreshLists }) => {
     if (lists.length === 0) {
         return (
             <Container maxW="container.xl" mt="40px" mb="40px" textAlign="center">
-                <Flex mb="20px" justifyContent={"center"}>
-                    <img src={NoList} width={"300px"} />
+                <Flex mb="40px" mt="80px" justifyContent={"center"}>
+                    <img src={NoList} width={"250px"} />
                 </Flex>
-                <Text id="no-list" fontSize="xl" mb="0px">You don't have any lists... yet.</Text>
+                <Text id="no-list" fontSize="xl">You don't have any lists... yet.</Text>
                 <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" px="20px" onClick={() => setShowModal(true)}>
                     Create New List
                 </Button>
@@ -264,7 +265,7 @@ const Lists = ({ user, refreshLists }) => {
                 </Flex>
             </Box>
 
-            <Flex alignItems="center" flexWrap="wrap" gap="10px" mt="40px">
+            <Flex alignItems="center" flexWrap="wrap" gap="10px" mt="20px">
                 {selectedListDetails && (
                     <>
                         {selectedListDetails.description && (
@@ -282,41 +283,58 @@ const Lists = ({ user, refreshLists }) => {
                 )}
             </Flex>
 
-            {lists.map((list) => (
-                <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="40px">
-                    {list.birds && list.birds.length > 0 && list.birds.map((bird) => (
-                        <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
-                            <AspectRatio ratio={1 / 1.1}>
-                                <Image
-                                    src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
-                                    alt={bird.name}
-                                    objectFit="cover"
-                                    style={{ borderRadius: '5px 5px 0px 0px' }}
-                                />
-                            </AspectRatio>
-                            <CardBody p="6">
-                                <Heading id="logo" as="h3" size="md" mb="8px">
-                                    {bird.name}
-                                </Heading>
-                                <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
-                            </CardBody>
-                            <CardFooter gap="10px" mt="-20px">
-                                <Button
-                                    variant='outline'
-                                    colorScheme='gray'
-                                    flex={1}
-                                    onClick={() => handleOpenDrawer(bird)}
-                                >
-                                    Details
-                                </Button>
-                                <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(list.id, bird.docId)}>
-                                    Remove
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </SimpleGrid>
-            ))}
+            {/* Display the selected list's birds or an empty state if there are no birds */}
+            {selectedListDetails ? (
+                selectedListDetails.birds.length > 0 ? (
+                    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="40px">
+                        {selectedListDetails.birds.map((bird) => (
+                            <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
+                                <AspectRatio ratio={1 / 1.1}>
+                                    <Image
+                                        src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
+                                        alt={bird.name}
+                                        objectFit="cover"
+                                        style={{ borderRadius: '5px 5px 0px 0px' }}
+                                    />
+                                </AspectRatio>
+                                <CardBody p="6">
+                                    <Heading id="logo" as="h3" size="md" mb="8px">
+                                        {bird.name}
+                                    </Heading>
+                                    <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
+                                </CardBody>
+                                <CardFooter gap="10px" mt="-20px">
+                                    <Button
+                                        variant='outline'
+                                        colorScheme='gray'
+                                        flex={1}
+                                        onClick={() => handleOpenDrawer(bird)}
+                                    >
+                                        Details
+                                    </Button>
+                                    <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(selectedListId, bird.docId)}>
+                                        Remove
+                                    </Button>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </SimpleGrid>
+                ) : (
+                    // Empty state for when the selected list has no birds
+                    <Flex direction="column" align="center" justify="center" mt="80px">
+                        <Flex mb="40px" justifyContent={"center"}>
+                            <img src={NoBird} width={"250px"} />
+                        </Flex>
+                        <Text id="no-list" fontSize="xl">Go add some birds!</Text>
+                        <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" onClick={onAddBirdsClick}>
+                            Add Birds
+                        </Button>
+                    </Flex>
+                )
+            ) : (
+                // This can be shown if no list is selected or if there are no lists at all
+                <Text fontSize="xl"></Text>
+            )}
 
             <BirdDrawer
                 isOpen={isDrawerOpen}
@@ -332,7 +350,7 @@ const Lists = ({ user, refreshLists }) => {
                     <ModalHeader>Add New List</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        <FormControl>
+                        <FormControl isRequired>
                             <FormLabel>List Name</FormLabel>
                             <Input value={newListName} onChange={(e) => setNewListName(e.target.value)} />
                         </FormControl>

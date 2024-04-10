@@ -3,12 +3,14 @@ import { getFirestore, addDoc, collection, query, where, getDocs, deleteDoc, doc
 import {
     AspectRatio, Box, Tag, Button, Card, Image, CardBody, CardFooter, SimpleGrid, Container, Heading, Text,
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input,
-    Select, Flex, useToast
+    Select, Flex, useToast, Wrap, WrapItem
 } from '@chakra-ui/react';
 import { FaPlus } from 'react-icons/fa';
 import { BiTrash } from "react-icons/bi";
 import { IoMdAdd } from "react-icons/io"; // Corrected import
 import NoList from '../images/no-list.png';
+import { format } from 'date-fns';
+import BirdDrawer from '../components/BirdDrawer';
 
 
 const Lists = ({ user, refreshLists }) => {
@@ -21,6 +23,8 @@ const Lists = ({ user, refreshLists }) => {
     const [listToDelete, setListToDelete] = useState(null);
     const [showBirdDeleteConfirmModal, setShowBirdDeleteConfirmModal] = useState(false);
     const [birdToDelete, setBirdToDelete] = useState({ listId: '', birdDocId: '' });
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const [selectedBirdForDetails, setSelectedBirdForDetails] = useState(null);
     const toast = useToast();
 
     const fetchListsAndBirds = async () => {
@@ -45,6 +49,12 @@ const Lists = ({ user, refreshLists }) => {
                 listsData.push(listData);
             }
             setLists(listsData);
+
+            if (listsData.length === 1) {
+                setSelectedListId(listsData[0].id);
+            } else if (listsData.length === 0) {
+                setSelectedListId(''); // Clear selection if no lists
+            }
         } catch (error) {
             console.error('Error fetching lists:', error);
         }
@@ -60,7 +70,6 @@ const Lists = ({ user, refreshLists }) => {
                 title: "List name is required.",
                 status: "error",
                 duration: 5000,
-                isClosable: true,
             });
             return;
         }
@@ -80,7 +89,6 @@ const Lists = ({ user, refreshLists }) => {
                 title: "List created successfully.",
                 status: "success",
                 duration: 5000,
-                isClosable: true,
             });
             setNewListName('');
             setNewListDescription('');
@@ -93,7 +101,6 @@ const Lists = ({ user, refreshLists }) => {
                 description: "Unexpected error occurred.",
                 status: "error",
                 duration: 5000,
-                isClosable: true,
             });
         }
     };
@@ -113,7 +120,6 @@ const Lists = ({ user, refreshLists }) => {
                 title: "List deleted successfully.",
                 status: "info",
                 duration: 5000,
-                isClosable: true,
             });
             // Reset states and fetch updated lists
             setListToDelete(null);
@@ -127,7 +133,6 @@ const Lists = ({ user, refreshLists }) => {
                 description: "Unexpected error occurred.",
                 status: "error",
                 duration: 5000,
-                isClosable: true,
             });
             // Reset state on error too
             setListToDelete(null);
@@ -150,7 +155,6 @@ const Lists = ({ user, refreshLists }) => {
                 description: "The bird has been removed from the list.",
                 status: "success",
                 duration: 5000,
-                isClosable: true,
             });
             fetchListsAndBirds(); // Re-fetch to update UI
             setShowBirdDeleteConfirmModal(false); // Close confirmation modal
@@ -164,14 +168,23 @@ const Lists = ({ user, refreshLists }) => {
         setShowBirdDeleteConfirmModal(true);
     };
 
+    const selectedListDetails = lists.find(list => list.id === selectedListId);
+
+    const formattedDateCreated = selectedListDetails ? format(new Date(selectedListDetails.createdAt.seconds * 1000), 'PPP') : '';
+
+    const handleOpenDrawer = (bird) => {
+        setSelectedBirdForDetails(bird);
+        setIsDrawerOpen(true);
+    };
+
 
     if (lists.length === 0) {
         return (
             <Container maxW="container.xl" mt="40px" mb="40px" textAlign="center">
-                <Flex justifyContent={"center"}>
-                    <img src={NoList} width={"400px"} />
+                <Flex mb="20px" justifyContent={"center"}>
+                    <img src={NoList} width={"300px"} />
                 </Flex>
-                <Text fontSize="xl" mb="4">You currently have no lists.</Text>
+                <Text id="no-list" fontSize="xl" mb="0px">You don't have any lists... yet.</Text>
                 <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" px="20px" onClick={() => setShowModal(true)}>
                     Create New List
                 </Button>
@@ -182,12 +195,12 @@ const Lists = ({ user, refreshLists }) => {
                         <ModalHeader>Create New List</ModalHeader>
                         <ModalCloseButton />
                         <ModalBody pb={6}>
-                            <FormControl>
+                            <FormControl isRequired>
                                 <FormLabel>List Name</FormLabel>
                                 <Input value={newListName} onChange={(e) => setNewListName(e.target.value)} />
                             </FormControl>
                             <FormControl mt={4}>
-                                <FormLabel>Description (optional)</FormLabel>
+                                <FormLabel>Description</FormLabel>
                                 <Input value={newListDescription} onChange={(e) => setNewListDescription(e.target.value)} />
                             </FormControl>
                         </ModalBody>
@@ -210,33 +223,37 @@ const Lists = ({ user, refreshLists }) => {
                     size="lg"
                     style={{ paddingLeft: '10px', paddingRight: '10px' }}
                     value={selectedListId}
-                    placeholder='Select a list'
                     onChange={(e) => setSelectedListId(e.target.value)}
                     maxW={{ base: '100%', md: '300px' }}
-                    mr={{ base: '0', md: '20px' }}
+                    mr={{ base: '0', md: '10px' }}
                     mb={{ base: '0px', md: '0px' }}
                 >
                     {lists.map((list) => (
                         <option key={list.id} value={list.id}>{list.name}</option>
                     ))}
                 </Select>
-                {/* Ensure the Buttons are in a Flex container with margin to control spacing */}
+
                 <Flex alignItems="center" flexWrap="wrap">
-                    <Button
-                        leftIcon={<BiTrash />}
-                        onClick={() => promptDeleteList(selectedListId)}
-                        mt={{ base: '20px', md: '0px' }}
-                        mr={{ base: '10px', md: '20px' }}
-                        mb={{ base: '0px', md: '0px' }}
-                        size="lg"
-                        px="20px"
-                    >
-                        Delete List
-                    </Button>
+                    {lists.length > 0 && (
+                        <Button
+                            leftIcon={<BiTrash />}
+                            onClick={() => promptDeleteList(selectedListId)}
+                            colorScheme='gray'
+                            variant={'outline'}
+                            size="lg"
+                            mr="10px"
+                            mt={{ base: '20px', md: '0px' }}
+                            mb={{ base: '0px', md: '0px' }}
+                        >
+                            Delete List
+                        </Button>
+                    )}
 
                     <Button
                         leftIcon={<IoMdAdd />}
                         size="lg"
+                        colorScheme='gray'
+                        variant={'outline'}
                         px="20px"
                         mt={{ base: '20px', md: '0px' }}
                         mb={{ base: '0px', md: '0px' }}
@@ -246,6 +263,24 @@ const Lists = ({ user, refreshLists }) => {
                     </Button>
                 </Flex>
             </Box>
+
+            <Flex alignItems="center" flexWrap="wrap" gap="10px" mt="40px">
+                {selectedListDetails && (
+                    <>
+                        {selectedListDetails.description && (
+                            <Box>
+                                <Tag size="lg" variant='subtle' colorScheme='gray'>{selectedListDetails.description}</Tag>
+                            </Box>
+                        )}
+                        <Box>
+                            <Tag size="lg" variant='subtle' colorScheme='gray'>Birds: {selectedListDetails.birds.length}</Tag>
+                        </Box>
+                        <Box>
+                            <Tag size="lg" variant='subtle' colorScheme='gray'>Created {formattedDateCreated || 'N/A'}</Tag>
+                        </Box>
+                    </>
+                )}
+            </Flex>
 
             {lists.map((list) => (
                 <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="40px">
@@ -266,10 +301,14 @@ const Lists = ({ user, refreshLists }) => {
                                 <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
                             </CardBody>
                             <CardFooter gap="10px" mt="-20px">
-                                <Button variant='outline' colorScheme='gray' flex={1}>
+                                <Button
+                                    variant='outline'
+                                    colorScheme='gray'
+                                    flex={1}
+                                    onClick={() => handleOpenDrawer(bird)}
+                                >
                                     Details
                                 </Button>
-                                {/* Corrected part: Directly use bird's information here without mapping */}
                                 <Button variant='outline' colorScheme='gray' flex={1} onClick={() => promptDeleteBird(list.id, bird.docId)}>
                                     Remove
                                 </Button>
@@ -278,6 +317,13 @@ const Lists = ({ user, refreshLists }) => {
                     ))}
                 </SimpleGrid>
             ))}
+
+            <BirdDrawer
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                selectedBirdForDetails={selectedBirdForDetails}
+                showAddToListButton={false}
+            />
 
             {/* Add List Modal */}
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
@@ -320,14 +366,14 @@ const Lists = ({ user, refreshLists }) => {
             <Modal isOpen={showBirdDeleteConfirmModal} onClose={() => setShowBirdDeleteConfirmModal(false)}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Confirm Bird Deletion</ModalHeader>
+                    <ModalHeader>Confirm Bird Removal</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        Are you sure you want to delete this bird from the list? This action cannot be undone.
+                        Are you sure you want to remove this bird from the list? This action cannot be undone.
                     </ModalBody>
                     <ModalFooter>
                         <Button colorScheme="red" mr={3} onClick={removeBirdFromList}>
-                            Delete Bird
+                            Remove Bird
                         </Button>
                         <Button variant="ghost" onClick={() => setShowBirdDeleteConfirmModal(false)}>Cancel</Button>
                     </ModalFooter>

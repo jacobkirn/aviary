@@ -7,6 +7,11 @@
 
 */
 
+#root > div.css-vik367 > div:nth-child(2) > button.chakra-button.css-1xbmrf2, 
+#root > div.css-vik367 > div:nth-child(2) > button.chakra-button.css-8gdop0 {
+    margin-right: var(--chakra-space-0);
+}
+
 #logo {
     font-family: "Crimson Pro", serif;
     font-optical-sizing: auto;
@@ -39,13 +44,21 @@
     font-style: normal;
 }
 
+#no-list {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 32px;
+}
+
 #drawer-data {
     font-family: "Crimson Pro", serif;
     font-optical-sizing: auto;
     font-weight: 400;
     font-style: normal;
     font-size: 32px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .css-a5mhaz {

@@ -28,7 +28,7 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                                 src={selectedBirdForDetails.images && selectedBirdForDetails.images.length > 0 ? selectedBirdForDetails.images[0] : 'https://via.placeholder.com/150'}
                                 alt={displayValueOrPlaceholder(selectedBirdForDetails.name)}
                                 objectFit="cover"
-                                borderRadius="md"
+                                borderRadius="lg"
                                 mb="0px"
                                 h="500"
                                 w="100%"
@@ -36,14 +36,14 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                             <Button leftIcon={<FaGoogle />}
                                 bg="#eeeeee"
                                 color="#000000"
-                                _hover={{ bg: '#dddddd' }}
+                                _hover={{ bg: '#bbbbbb' }}
                                 _active={{
-                                    bg: '#cccccc',
+                                    bg: '#aaaaaa',
                                 }}
                                 size="lg"
                                 width="full"
                                 mt="-76px"
-                                borderRadius={'0px'}
+                                borderRadius={'0px 0px 6px 6px'}
                                 onClick={handleGoogleImageSearch}>
                                 Search Google Images
                             </Button>
@@ -68,9 +68,9 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                         <Text>No bird selected</Text>
                     )}
                 </DrawerBody>
-                <DrawerFooter>
-                    <Flex width="full">
-                        {showAddToListButton && (
+                {showAddToListButton && (
+                    <DrawerFooter>
+                        <Flex width="full">
                             <Button
                                 size="lg"
                                 colorScheme='blue'
@@ -79,9 +79,10 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                             >
                                 Add to List
                             </Button>
-                        )}
-                    </Flex>
-                </DrawerFooter>
+
+                        </Flex>
+                    </DrawerFooter>
+                )}
             </DrawerContent>
         </Drawer>
     );

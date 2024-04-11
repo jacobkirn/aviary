@@ -183,7 +183,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
         return (
             <Container maxW="container.xl" mt="40px" mb="40px" textAlign="center">
                 <Flex mb="20px" mt="80px" justifyContent={"center"}>
-                    <img src={NoList} width={"250px"} />
+                    <img src={NoList} width={"200px"} />
                 </Flex>
                 <Text id="no-list" fontSize="xl">You don't have any lists... yet.</Text>
                 <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" px="20px" onClick={() => setShowModal(true)}>
@@ -279,6 +279,9 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                         <Box>
                             <Tag size="lg" variant='subtle' colorScheme='gray'>Created {formattedDateCreated || 'N/A'}</Tag>
                         </Box>
+                        {/*<Box>
+                            <Tag size="lg" variant='subtle' colorScheme='yellow'>🏆 Bird Nerd</Tag>
+                    </Box>*/}
                     </>
                 )}
             </Flex>
@@ -305,6 +308,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                                 </CardBody>
                                 <CardFooter gap="10px" mt="-24px">
                                     <Button
+                                        size="lg"
                                         m="1"
                                         variant='outline'
                                         colorScheme='gray'
@@ -313,7 +317,9 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                                     >
                                         Details
                                     </Button>
-                                    <Button m="1"
+                                    <Button
+                                        size="lg"
+                                        m="1"
                                         variant='outline'
                                         colorScheme='gray'
                                         flex={1}
@@ -328,9 +334,9 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                     // Empty state for when the selected list has no birds
                     <Flex direction="column" align="center" justify="center" mt="80px">
                         <Flex mb="20px" justifyContent={"center"}>
-                            <img src={NoBird} width={"250px"} />
+                            <img src={NoBird} width={"200px"} />
                         </Flex>
-                        <Text id="no-list" fontSize="xl">No birds here. Try adding some!</Text>
+                        <Text id="no-list" fontSize="xl" textAlign={'center'}>No birds here. Try adding some!</Text>
                         <Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" onClick={onAddBirdsClick}>
                             Add Birds
                         </Button>

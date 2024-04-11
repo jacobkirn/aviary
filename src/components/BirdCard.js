@@ -35,10 +35,10 @@ const BirdCard = ({ bird, onDetailsClick, onAddClick }) => (
                 </Stack>
             </CardBody>
             <CardFooter gap="10px" mt="-24px">
-                <Button m="1" variant='outline' colorScheme='gray' flex={1} onClick={() => onDetailsClick(bird)}>
+                <Button m="1" size="lg" variant='outline' colorScheme='gray' flex={1} onClick={() => onDetailsClick(bird)}>
                     Details
                 </Button>
-                <Button m="1" variant='outline' colorScheme='gray' flex={1} onClick={() => onAddClick(bird)}>
+                <Button m="1" size="lg" variant='outline' colorScheme='gray' flex={1} onClick={() => onAddClick(bird)}>
                     Add
                 </Button>
             </CardFooter>

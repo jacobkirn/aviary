@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { getFirestore, addDoc, collection, query, where, getDocs, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, addDoc, updateDoc, collection, query, where, getDocs, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
 import {
     AspectRatio, Box, Tag, Button, Card, Image, CardBody, CardFooter, SimpleGrid, Container, Heading, Text,
     Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input,
-    Select, Flex, useToast, Wrap, WrapItem
+    Select, Flex, useToast, Menu, MenuButton, MenuList, MenuItem, IconButton
 } from '@chakra-ui/react';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaCog } from 'react-icons/fa';
 import { BiTrash } from "react-icons/bi";
-import { IoMdAdd } from "react-icons/io"; // Corrected import
+import { IoMdAdd } from "react-icons/io";
 import NoList from '../images/no-list.png';
 import NoBird from '../images/no-birds.png';
 import { format } from 'date-fns';
 import BirdDrawer from '../components/BirdDrawer';
-
+import { MdOutlinePlaylistAdd } from "react-icons/md";
+import { FaEdit, FaCopy, FaTrashAlt } from 'react-icons/fa';
 
 const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
     const [lists, setLists] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
     const [newListName, setNewListName] = useState('');
     const [newListDescription, setNewListDescription] = useState('');
     const [selectedListId, setSelectedListId] = useState('');
@@ -26,38 +28,38 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
     const [birdToDelete, setBirdToDelete] = useState({ listId: '', birdDocId: '' });
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedBirdForDetails, setSelectedBirdForDetails] = useState(null);
+    const selectedListDetails = lists.find(list => list.id === selectedListId);
+    const formattedDateCreated = selectedListDetails ? format(new Date(selectedListDetails.createdAt.seconds * 1000), 'PPP') : '';
     const toast = useToast();
 
     const fetchListsAndBirds = async () => {
         if (!user) return;
-
         const db = getFirestore();
         try {
             const q = query(collection(db, 'lists'), where('createdBy', '==', user.uid));
             const querySnapshot = await getDocs(q);
-            const listsData = [];
-            for (const doc of querySnapshot.docs) {
+            const listsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
                 const listData = {
                     id: doc.id,
                     ...doc.data(),
                 };
-                // Fetch birds for each list
                 const birdsSnapshot = await getDocs(collection(db, 'lists', doc.id, 'birds'));
                 listData.birds = birdsSnapshot.docs.map(birdDoc => ({
-                    docId: birdDoc.id, // This is the Firestore document ID.
+                    docId: birdDoc.id,
                     ...birdDoc.data(),
                 }));
-                listsData.push(listData);
-            }
+                return listData;
+            }));
             setLists(listsData);
-
-            if (listsData.length === 1) {
-                setSelectedListId(listsData[0].id);
-            } else if (listsData.length === 0) {
-                setSelectedListId(''); // Clear selection if no lists
-            }
+            if (listsData.length > 0) setSelectedListId(listsData[0].id);
         } catch (error) {
-            console.error('Error fetching lists:', error);
+            toast({
+                title: "Error fetching lists and birds.",
+                description: "Unable to fetch data. Please try again later.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
         }
     };
 
@@ -65,43 +67,59 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
         fetchListsAndBirds();
     }, [user, refreshLists]);
 
-    const handleAddList = async () => {
+    const handleAddOrUpdateList = async () => {
         if (!newListName.trim()) {
             toast({
-                title: "List name is required.",
+                title: "Error",
+                description: "List name is required.",
                 status: "error",
                 duration: 5000,
+                isClosable: true,
             });
             return;
         }
-
         try {
             const db = getFirestore();
-            const newListRef = await addDoc(collection(db, 'lists'), {
-                name: newListName,
-                description: newListDescription,
-                createdBy: user.uid,
-                createdAt: serverTimestamp(),
-            });
-
-            // After successfully creating the list, set its ID as the selected list
-            setSelectedListId(newListRef.id);
-            toast({
-                title: "List created successfully.",
-                status: "success",
-                duration: 5000,
-            });
+            if (isEditMode) {
+                await updateDoc(doc(db, 'lists', selectedListId), {
+                    name: newListName,
+                    description: newListDescription,
+                });
+                toast({
+                    title: "List Updated",
+                    description: `"${newListName}" has been updated successfully.`,
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            } else {
+                const newListRef = await addDoc(collection(db, 'lists'), {
+                    name: newListName,
+                    description: newListDescription,
+                    createdBy: user.uid,
+                    createdAt: serverTimestamp(),
+                });
+                setSelectedListId(newListRef.id);
+                toast({
+                    title: "List Created",
+                    description: `"${newListName}" has been created successfully.`,
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
             setNewListName('');
             setNewListDescription('');
             setShowModal(false);
+            setIsEditMode(false);
             fetchListsAndBirds();
         } catch (error) {
-            console.error('Error creating new list:', error);
             toast({
-                title: "Failed to create list.",
+                title: "Failed to complete action",
                 description: "Unexpected error occurred.",
                 status: "error",
                 duration: 5000,
+                isClosable: true,
             });
         }
     };
@@ -113,54 +131,41 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 
     const deleteList = async () => {
         if (!listToDelete) return;
-
         try {
             const db = getFirestore();
             await deleteDoc(doc(db, 'lists', listToDelete));
             toast({
-                title: "List deleted successfully.",
+                title: "List Deleted",
+                description: "The list has been successfully deleted.",
                 status: "info",
                 duration: 5000,
+                isClosable: true,
             });
-            // Reset states and fetch updated lists
             setListToDelete(null);
             setShowConfirmModal(false);
             setSelectedListId('');
             fetchListsAndBirds();
         } catch (error) {
-            console.error('Error deleting list:', error);
             toast({
-                title: "Failed to delete list.",
+                title: "Failed to delete list",
                 description: "Unexpected error occurred.",
                 status: "error",
                 duration: 5000,
+                isClosable: true,
             });
-            // Reset state on error too
             setListToDelete(null);
             setShowConfirmModal(false);
         }
     };
 
-    const removeBirdFromList = async () => {
-        const { listId, birdDocId } = birdToDelete;
-        if (!listId || !birdDocId) return;
-
-        const db = getFirestore();
-        const birdDocRef = doc(db, `lists/${listId}/birds/${birdDocId}`);
-
-        try {
-            await deleteDoc(birdDocRef);
-            console.log("Bird successfully deleted from the list.");
-            toast({
-                title: "Bird deleted successfully.",
-                description: "The bird has been removed from the list.",
-                status: "success",
-                duration: 5000,
-            });
-            fetchListsAndBirds(); // Re-fetch to update UI
-            setShowBirdDeleteConfirmModal(false); // Close confirmation modal
-        } catch (error) {
-            console.error("Error removing bird from list:", error);
+    const handleEditListDetails = () => {
+        if (!selectedListId) return;
+        const list = lists.find(list => list.id === selectedListId);
+        if (list) {
+            setNewListName(list.name);
+            setNewListDescription(list.description);
+            setIsEditMode(true);
+            setShowModal(true);
         }
     };
 
@@ -169,15 +174,114 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
         setShowBirdDeleteConfirmModal(true);
     };
 
-    const selectedListDetails = lists.find(list => list.id === selectedListId);
+    const removeBirdFromList = async () => {
+        if (!birdToDelete.listId || !birdToDelete.birdDocId) return;
+        try {
+            const db = getFirestore();
+            await deleteDoc(doc(db, `lists/${birdToDelete.listId}/birds/${birdToDelete.birdDocId}`));
+            toast({
+                title: "Bird Removed",
+                description: "The bird has been removed from the list.",
+                status: "info",
+                duration: 5000,
+                isClosable: true,
+            });
+            fetchListsAndBirds();
+            setShowBirdDeleteConfirmModal(false);
+        } catch (error) {
+            console.error("Error removing bird from list:", error);
+        }
+    };
 
-    const formattedDateCreated = selectedListDetails ? format(new Date(selectedListDetails.createdAt.seconds * 1000), 'PPP') : '';
+    const handleDuplicateListWithBirds = async () => {
+        if (!selectedListId) return;
+
+        const listToDuplicate = lists.find(list => list.id === selectedListId);
+        if (!listToDuplicate) return;
+
+        const db = getFirestore();
+        try {
+            // Duplicate the list
+            const newListRef = await addDoc(collection(db, 'lists'), {
+                name: `${listToDuplicate.name} (copy)`,
+                description: listToDuplicate.description,
+                createdBy: user.uid,
+                createdAt: serverTimestamp(),
+            });
+
+            // Duplicate each bird
+            for (const bird of listToDuplicate.birds) {
+                await addDoc(collection(db, 'lists', newListRef.id, 'birds'), {
+                    ...bird,
+                    createdAt: serverTimestamp() // or you can preserve the original timestamp if needed
+                });
+            }
+
+            toast({
+                title: "List and Birds Duplicated",
+                description: `"${listToDuplicate.name}" and its birds have been duplicated successfully.`,
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+
+            fetchListsAndBirds(); // Refresh the lists
+        } catch (error) {
+            toast({
+                title: "Failed to duplicate list and birds",
+                description: "Unexpected error occurred.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     const handleOpenDrawer = (bird) => {
         setSelectedBirdForDetails(bird);
         setIsDrawerOpen(true);
     };
 
+    const getColorScheme = (status) => {
+        switch (status) {
+            case 'Low Concern':
+                return 'green';
+            case 'Common Bird in Steep Decline':
+                return 'orange';
+            case 'Declining':
+                return 'yellow';
+            case 'Red Watch List':
+                return 'red';
+            default:
+                return 'gray';
+        }
+    }
+
+    const getTagAndColor = (birdCount) => {
+        let tag = '';
+        let colorScheme = 'gray';
+        if (birdCount >= 50) {
+            tag = '🦅 Bird Braniac';
+            colorScheme = 'yellow';
+        } else if (birdCount >= 25) {
+            tag = '🐥 Feathered Friend';
+            colorScheme = 'cyan'; // Assuming 'silver' is a custom color you've defined in your theme
+        } else if (birdCount >= 10) {
+            tag = '🐣 Bird Nerd';
+            colorScheme = 'orange'; // Assuming 'bronze' is a custom color you've defined in your theme
+        } else if (birdCount >= 1) {
+            tag = '🥚 Early Bird';
+            colorScheme = 'purple';
+        }
+        return { tag, colorScheme };
+    };
+
+    let tag, colorScheme;
+    if (selectedListDetails && selectedListDetails.birds.length > 0) {
+        const tagColor = getTagAndColor(selectedListDetails.birds.length);
+        tag = tagColor.tag;
+        colorScheme = tagColor.colorScheme;
+    }
 
     if (lists.length === 0) {
         return (
@@ -206,7 +310,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                             </FormControl>
                         </ModalBody>
                         <ModalFooter>
-                            <Button colorScheme="blue" mr={3} onClick={handleAddList}>
+                            <Button colorScheme="blue" mr={3} onClick={handleAddOrUpdateList}>
                                 Create List
                             </Button>
                             <Button onClick={() => setShowModal(false)}>Cancel</Button>
@@ -219,53 +323,51 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 
     return (
         <Container maxW="container.xl" mt="40px" mb="40px">
-            <Box display="flex" alignItems="center" justifyContent="flex-start" flexWrap="wrap" mb="20px">
+            <Box display="flex" alignItems="center" w="100%" mb="20px">
                 <Select
                     size="lg"
-                    style={{ paddingLeft: '10px', paddingRight: '10px' }}
                     value={selectedListId}
                     onChange={(e) => setSelectedListId(e.target.value)}
-                    maxW={{ base: '100%', md: '300px' }}
-                    mr={{ base: '0', md: '10px' }}
-                    mb={{ base: '0px', md: '0px' }}
+                    flex={{ base: "1", md: "none" }}
+                    width={{ base: "100%", md: "300px" }}
+                    style={{ paddingLeft: '0.75em', paddingRight: '0.75em' }}
+                    mr="10px"
                 >
                     {lists.map((list) => (
                         <option key={list.id} value={list.id}>{list.name}</option>
                     ))}
                 </Select>
-
-                <Flex alignItems="center" flexWrap="wrap">
-                    {lists.length > 0 && (
-                        <Button
-                            leftIcon={<BiTrash />}
-                            onClick={() => promptDeleteList(selectedListId)}
-                            colorScheme='gray'
-                            variant={'outline'}
-                            size="lg"
-                            mr="10px"
-                            mt={{ base: '20px', md: '0px' }}
-                            mb={{ base: '0px', md: '0px' }}
-                        >
-                            Delete List
-                        </Button>
-                    )}
-
-                    <Button
-                        leftIcon={<IoMdAdd />}
+                <Menu>
+                    <MenuButton
+                        as={IconButton}
+                        icon={<FaCog />}
                         size="lg"
-                        colorScheme='gray'
-                        variant={'outline'}
-                        px="20px"
-                        mt={{ base: '20px', md: '0px' }}
-                        mb={{ base: '0px', md: '0px' }}
-                        onClick={() => setShowModal(true)}
+                        colorScheme="gray"
+                        variant="outline"
+                        flexShrink="0"
                     >
-                        Add New List
-                    </Button>
-                </Flex>
+                        Settings
+                    </MenuButton>
+                    <MenuList size="lg">
+                        <MenuItem minH='40px' icon={<FaEdit />} onClick={handleEditListDetails}>Edit Details</MenuItem>
+                        <MenuItem minH='40px' icon={<FaCopy />} onClick={handleDuplicateListWithBirds}>Duplicate List</MenuItem>
+                        <MenuItem minH='40px' icon={<FaTrashAlt />} onClick={() => promptDeleteList(selectedListId)}>Delete List</MenuItem>
+                    </MenuList>
+                </Menu>
+                <IconButton
+                    icon={<MdOutlinePlaylistAdd />}
+                    aria-label="Add new list"
+                    onClick={() => setShowModal(true)}
+                    size="lg"
+                    colorScheme='gray'
+                    variant={'outline'}
+                    fontSize="24px"
+                    flexShrink="0" 
+                    ml="10px"
+                />
             </Box>
 
-            <Flex alignItems="center" flexWrap="wrap" gap="10px" mt="20px">
+            <Flex alignItems="center" flexWrap="wrap" gap="10px" mt="20px" mb="20px">
                 {selectedListDetails && (
                     <>
                         {selectedListDetails.description && (
@@ -279,9 +381,11 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                         <Box>
                             <Tag size="lg" variant='subtle' colorScheme='gray'>Created {formattedDateCreated || 'N/A'}</Tag>
                         </Box>
-                        {/*<Box>
-                            <Tag size="lg" variant='subtle' colorScheme='yellow'>🏆 Bird Nerd</Tag>
-                    </Box>*/}
+                        {selectedListDetails && selectedListDetails.birds.length > 0 && (
+                            <Box>
+                                <Tag size="lg" variant='subtle' colorScheme={colorScheme}>{tag}</Tag>
+                            </Box>
+                        )}
                     </>
                 )}
             </Flex>
@@ -331,7 +435,6 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                         ))}
                     </SimpleGrid>
                 ) : (
-                    // Empty state for when the selected list has no birds
                     <Flex direction="column" align="center" justify="center" mt="80px">
                         <Flex mb="20px" justifyContent={"center"}>
                             <img src={NoBird} width={"200px"} />
@@ -343,7 +446,6 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                     </Flex>
                 )
             ) : (
-                // This can be shown if no list is selected or if there are no lists at all
                 <Text fontSize="xl"></Text>
             )}
 
@@ -358,24 +460,33 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>Add New List</ModalHeader>
+                    <ModalHeader>{newListName ? "Edit List Details" : "Create New List"}</ModalHeader>
                     <ModalCloseButton />
-                    <ModalBody>
+                    <ModalBody pb={6}>
                         <FormControl isRequired>
                             <FormLabel>List Name</FormLabel>
-                            <Input value={newListName} onChange={(e) => setNewListName(e.target.value)} />
+                            <Input value={newListName} onChange={(e) => setNewListName(e.target.value)} placeholder="Enter list name" />
                         </FormControl>
                         <FormControl mt={4}>
-                            <FormLabel>List Description</FormLabel>
-                            <Input value={newListDescription} onChange={(e) => setNewListDescription(e.target.value)} />
+                            <FormLabel>Description</FormLabel>
+                            <Input value={newListDescription} onChange={(e) => setNewListDescription(e.target.value)} placeholder="Enter list description" />
                         </FormControl>
                     </ModalBody>
                     <ModalFooter>
-                        <Button colorScheme="blue" mr={3} onClick={handleAddList}>Add</Button>
-                        <Button onClick={() => setShowModal(false)}>Cancel</Button>
+                        <Button colorScheme="blue" mr={3} onClick={handleAddOrUpdateList}>
+                            {isEditMode ? "Update" : "Create"}
+                        </Button>
+                        <Button onClick={() => {
+                            setShowModal(false);
+                            setIsEditMode(false);
+                            setNewListName('');
+                            setNewListDescription('');
+                        }}>Cancel</Button>
                     </ModalFooter>
+
                 </ModalContent>
             </Modal>
+
             <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
                 <ModalOverlay />
                 <ModalContent>
@@ -413,18 +524,3 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 };
 
 export default Lists;
-
-const getColorScheme = (status) => {
-    switch (status) {
-        case 'Low Concern':
-            return 'green';
-        case 'Common Bird in Steep Decline':
-            return 'orange';
-        case 'Declining':
-            return 'yellow';
-        case 'Red Watch List':
-            return 'red';
-        default:
-            return 'gray';
-    }
-}

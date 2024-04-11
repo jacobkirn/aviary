@@ -144,9 +144,11 @@ const Search = ({ onAddBird }) => {
                 addedAt: serverTimestamp(),
             });
             toast({
-                title: `${bird.name} has been successfully added.`,
+                title: "Bird Added",
+                description: `"${bird.name}" has been successfully added.`,
                 status: "success",
-                duration: 5000
+                duration: 5000,
+                isClosable: true,
             });
             fetchUserLists();
             setShowModal(false);
@@ -274,13 +276,9 @@ const Search = ({ onAddBird }) => {
                 gap={{ base: '20px', md: '10px' }}
                 direction={{ base: 'column-reverse', md: 'row' }}
             >
-                <InputGroup size='lg' width={{ base: '100%', md: '75%' }} mb={{ base: '0px', md: '0' }}> // Adjust spacing and width for mobile and desktop
+                <InputGroup size='lg' width={{ base: '100%', md: '75%' }}>
                     <InputLeftElement pointerEvents="none">
-                        {isLoading ? (
-                            <Spinner size="sm" color="blue.500" />
-                        ) : (
-                            <SearchIcon color="gray.300" />
-                        )}
+                        <SearchIcon color="gray.300" />
                     </InputLeftElement>
                     <Input
                         value={searchTerm}
@@ -303,7 +301,7 @@ const Search = ({ onAddBird }) => {
                 </InputGroup>
                 <Select
                     size='lg'
-                    style={{ paddingLeft: '10px', paddingRight: '10px' }}
+                    style={{ paddingLeft: '0.75em', paddingRight: '0.75em' }}
                     width={{ base: '100%', md: '25%' }}
                     onChange={(e) => setSelectedRegion(e.target.value)}
                 >
@@ -313,32 +311,40 @@ const Search = ({ onAddBird }) => {
                 </Select>
             </Flex>
 
-            {/* Birds Listing, Empty State, or No Results Message */}
-            {currentPage === null ? (
-                <div></div>
-            ) : birds.length > 0 ? (
-                <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
-                    {birds.map((bird, index) => (
-                        <BirdCard
-                            key={index}
-                            bird={bird}
-                            onDetailsClick={() => handleOpenDrawer(bird)}
-                            onAddClick={() => handleOpenModal(bird)}
-                        />
-                    ))}
-                </SimpleGrid>
-            ) : (
-                <Flex direction="column" align="center" justify="center" mt="80px">
-                    <Flex mb="20px" justifyContent={"center"}>
-                        <Image src={NoResults} width={"250px"} />
-                    </Flex>
-                    <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
-                        "{lastSearchTerm}" returned no results.
-                    </Text>
-                    <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
-                        Try expanding your filters or checking your spelling.
-                    </Text>
+            {/* Spinner while loading */}
+            {isLoading && (
+                <Flex justify="center" mt="120px">
+                    <Spinner size="xl" color="blue.500" />
                 </Flex>
+            )}
+
+            {!isLoading && (
+                currentPage === null ? (
+                    <div></div> // Placeholder for initial state before search
+                ) : birds.length > 0 ? (
+                    <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
+                        {birds.map((bird, index) => (
+                            <BirdCard
+                                key={index}
+                                bird={bird}
+                                onDetailsClick={() => handleOpenDrawer(bird)}
+                                onAddClick={() => handleOpenModal(bird)}
+                            />
+                        ))}
+                    </SimpleGrid>
+                ) : (
+                    <Flex direction="column" align="center" justify="center" mt="80px">
+                        <Flex mb="20px" justifyContent={"center"}>
+                            <Image src={NoResults} width={"250px"} />
+                        </Flex>
+                        <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
+                            "{lastSearchTerm}" returned no results.
+                        </Text>
+                        <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
+                            Try expanding your filters or checking your spelling.
+                        </Text>
+                    </Flex>
+                )
             )}
 
 

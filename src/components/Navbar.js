@@ -84,7 +84,7 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                     icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
                     onClick={toggleColorMode}
                     aria-label="Toggle dark mode"
-                    mr="4"
+                    mr="10px"
                 />
 
                 {user ? (

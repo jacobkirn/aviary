@@ -3,7 +3,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import Navbar from './components/Navbar';
 import { signInWithGoogle, signOut } from './AuthService';
 import { auth } from './firebase';
-import Home from './pages/Home';
+import Main from './pages/Main';
 import NotLogged from './components/NotLogged'; // Import the login prompt component
 import './styles.css';
 
@@ -23,7 +23,7 @@ function App() {
         onSignIn={signInWithGoogle}
         onSignOut={() => signOut().then(() => setUser(null))}
       />
-      {user ? <Home /> : <NotLogged />}
+      {user ? <Main /> : <NotLogged />}
     </ChakraProvider>
   );
 }

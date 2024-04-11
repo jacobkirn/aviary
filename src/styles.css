@@ -1,0 +1,66 @@
+/* .banner {
+    background-image: url('../public/images/banner.jpg');
+    height: 600px;
+    background-size: cover;
+    background-position: 50%;
+}
+
+*/
+
+#root > div.css-vik367 > div:nth-child(2) > button.chakra-button.css-1xbmrf2, 
+#root > div.css-vik367 > div:nth-child(2) > button.chakra-button.css-8gdop0 {
+    margin-right: var(--chakra-space-0);
+}
+
+#logo {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 24px;
+}
+
+#welcome {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 48px;
+    margin-bottom: 20px;
+    padding: 0;
+}
+
+#list-name {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+}
+
+#list-desc {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+#no-list {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 32px;
+}
+
+#drawer-data {
+    font-family: "Crimson Pro", serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 32px;
+    margin-bottom: 16px;
+}
+
+.css-a5mhaz {
+    --chakra-space-4: 0px;
+}

@@ -84,7 +84,8 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                     icon={colorMode === 'dark' ? <FaSun /> : <FaMoon />}
                     onClick={toggleColorMode}
                     aria-label="Toggle dark mode"
-                    mr="10px"
+                    size="md"
+                    
                 />
 
                 {user ? (
@@ -93,11 +94,14 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                             icon={<FaUser />}
                             aria-label="Account menu"
                             onClick={onOpen}
-                            mr="2"
+                            ml="10px"
+                            size="md"
+                            
                         />
                     ) : (
                         <Menu>
-                            <MenuButton as={IconButton} icon={<FaUser />} aria-label="Account menu" />
+                            <MenuButton as={IconButton} icon={<FaUser />} aria-label="Account menu" 
+                                size="md" ml="10px"/>
                             <MenuList>
                                 <MenuItem color="red.500" icon={<FaSignOutAlt />} onClick={handleSignOut}>Sign Out</MenuItem>
                             </MenuList>
@@ -109,6 +113,8 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                         colorScheme={user ? undefined : "green"} // Change color to cyan if user is not logged in
                         leftIcon={<FaGoogle />}
                         onClick={handleSignIn}
+                        size="md"
+                        ml="10px"
                     >
                         Sign Up / Log In
                     </Button>

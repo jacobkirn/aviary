@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import {
     Button, Container, Input, SimpleGrid, Box, Image, Heading,
     InputRightElement, Flex, Spinner, AspectRatio, Stack, Tag, Card, Select,
-    CardBody, CardFooter, InputGroup, InputLeftElement, Text, IconButton, useToast
+    CardBody, CardFooter, InputGroup, InputLeftElement, Text, IconButton, useToast,
+    Menu, MenuButton, Checkbox, MenuList, MenuItem, MenuGroup
 } from '@chakra-ui/react';
 import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
 import axios from 'axios';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { doc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { auth } from '../firebase';
-import NoSearch from '../images/no-search.png';
+import { IoFilter } from "react-icons/io5";
 import NoResults from '../images/no-results.png';
 import AddBirdModal from '../components/AddBirdModal';
 import BirdDrawer from '../components/BirdDrawer';
@@ -33,6 +34,7 @@ const Search = ({ onAddBird }) => {
     const [newListName, setNewListName] = useState('');
     const [newListDescription, setNewListDescription] = useState('');
     const [selectedRegion, setSelectedRegion] = useState('All Regions');
+    const [selectedRegions, setSelectedRegions] = useState(['North America', 'Western Europe']);
     const [lastSearchTerm, setLastSearchTerm] = useState('');
     const toast = useToast();
 
@@ -73,6 +75,13 @@ const Search = ({ onAddBird }) => {
                 isClosable: true,
             });
         }
+    };
+
+    const handleRegionChange = (region) => {
+        setSelectedRegions(prevRegions => {
+            const newRegions = prevRegions.includes(region) ? prevRegions.filter(r => r !== region) : [...prevRegions, region];
+            return newRegions.length === 0 ? [region] : newRegions; // Ensure one region is always selected
+        });
     };
 
     const db = getFirestore();
@@ -174,12 +183,7 @@ const Search = ({ onAddBird }) => {
                     'api-key': apiKey
                 }
             });
-            let filteredBirds = response.data.entities;
-
-            if (selectedRegion !== 'All Regions') {
-                filteredBirds = filteredBirds.filter(bird => bird.region.includes(selectedRegion));
-            }
-
+            let filteredBirds = response.data.entities.filter(bird => selectedRegions.some(region => bird.region.includes(region)));
             setBirds(filteredBirds);
             setTotalPages(response.data.totalPages);
         } catch (error) {
@@ -269,46 +273,49 @@ const Search = ({ onAddBird }) => {
 
             {/* Search Input and Region Filter */}
 
-            <Flex
-                justify="space-between"
-                align="center"
-                mb="20px"
-                gap={{ base: '20px', md: '10px' }}
-                direction={{ base: 'column-reverse', md: 'row' }}
-            >
-                <InputGroup size='lg' width={{ base: '100%', md: '75%' }}>
+            <Flex justify="space-between" align="center" mb="20px" gap="10px">
+                <InputGroup size='lg' flex="1">
                     <InputLeftElement pointerEvents="none">
                         <SearchIcon color="gray.300" />
                     </InputLeftElement>
                     <Input
                         value={searchTerm}
-                        onChange={handleSearchChange}
-                        onKeyPress={handleKeyPress}
+                        onChange={e => setSearchTerm(e.target.value)}
                         placeholder="Search by bird name"
                         size="lg"
+                        onKeyPress={handleKeyPress}
                     />
                     {searchTerm && (
                         <InputRightElement>
                             <IconButton
                                 icon={<CloseIcon />}
                                 size="sm"
-                                onClick={clearSearch}
+                                onClick={() => setSearchTerm('')}
                                 variant="ghost"
                                 aria-label="Clear search"
                             />
                         </InputRightElement>
                     )}
                 </InputGroup>
-                <Select
-                    size='lg'
-                    style={{ paddingLeft: '0.75em', paddingRight: '0.75em' }}
-                    width={{ base: '100%', md: '25%' }}
-                    onChange={(e) => setSelectedRegion(e.target.value)}
-                >
-                    <option value="All Regions">All Regions</option>
-                    <option value="North America">North America</option>
-                    <option value="Western Europe">Western Europe</option>
-                </Select>
+                <Menu>
+                    <MenuButton as={IconButton} icon={<IoFilter />} size="lg" variant="outline">
+                        Filter
+                    </MenuButton>
+                    <MenuList>
+                        <MenuGroup fontSize="16px" px="10px" mt="4px" title="Region Filter">
+                            <MenuItem as="label">
+                                <Checkbox isChecked={selectedRegions.includes('North America')} onChange={() => handleRegionChange('North America')}>
+                                    North America
+                                </Checkbox>
+                            </MenuItem>
+                            <MenuItem as="label">
+                                <Checkbox isChecked={selectedRegions.includes('Western Europe')} onChange={() => handleRegionChange('Western Europe')}>
+                                    Western Europe
+                                </Checkbox>
+                            </MenuItem>
+                        </MenuGroup>
+                    </MenuList>
+                </Menu>
             </Flex>
 
             {/* Spinner while loading */}
@@ -318,35 +325,26 @@ const Search = ({ onAddBird }) => {
                 </Flex>
             )}
 
-            {!isLoading && (
-                currentPage === null ? (
-                    <div></div> // Placeholder for initial state before search
-                ) : birds.length > 0 ? (
-                    <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
-                        {birds.map((bird, index) => (
-                            <BirdCard
-                                key={index}
-                                bird={bird}
-                                onDetailsClick={() => handleOpenDrawer(bird)}
-                                onAddClick={() => handleOpenModal(bird)}
-                            />
-                        ))}
-                    </SimpleGrid>
-                ) : (
-                    <Flex direction="column" align="center" justify="center" mt="80px">
-                        <Flex mb="20px" justifyContent={"center"}>
-                            <Image src={NoResults} width={"250px"} />
-                        </Flex>
-                        <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
-                            "{lastSearchTerm}" returned no results.
-                        </Text>
-                        <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
-                            Try expanding your filters or checking your spelling.
-                        </Text>
+            {/* Spinner while loading */}
+            {isLoading && <Flex justify="center" mt="120px"><Spinner size="xl" color="blue.500" /></Flex>}
+            {!isLoading && currentPage === null ? (
+                <div></div> // Placeholder for initial state before search
+            ) : birds.length > 0 ? (
+                <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
+                    {birds.map((bird, index) => (
+                        <BirdCard key={index} bird={bird} onDetailsClick={() => handleOpenDrawer(bird)} onAddClick={() => handleOpenModal(bird)} />
+                    ))}
+                </SimpleGrid>
+            ) : (
+                <Flex direction="column" align="center" justify="center" mt="80px">
+                    <Flex mb="20px" justifyContent={"center"}>
+                        <Image src={NoResults} width={"250px"} />
                     </Flex>
-                )
+                    <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
+                        "{lastSearchTerm}" returned no results. Try expanding your filters or checking your spelling.
+                    </Text>
+                </Flex>
             )}
-
 
             {/* Modals and Drawers */}
 

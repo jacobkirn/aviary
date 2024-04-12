@@ -461,7 +461,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                         ))}
                     </SimpleGrid>
                 ) : (
-                    <Flex direction="column" align="center" justify="center" mt="80px">
+                    <Flex direction="column" align="center" justify="center" mt="80px" mb="80px">
                         <Flex mb="20px" justifyContent={"center"}>
                             <img src={NoBird} width={"200px"} />
                         </Flex>

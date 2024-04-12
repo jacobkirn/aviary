@@ -54,7 +54,7 @@ export default function Home({ user, onNavigateToLists }) {
                                 <ListItem>Earn milestones as you go</ListItem>
                                 <ListItem>Filter by geographical region</ListItem>
                             </UnorderedList>
-                            <Button colorScheme="blue" px="20px" onClick={onNavigateToLists}>
+                            <Button size="lg" colorScheme="blue" px="20px" onClick={onNavigateToLists}>
                                 Get Started
                             </Button>
                             <Heading mt="20px" size="md" id="home-heading">About the Project</Heading>

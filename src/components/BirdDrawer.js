@@ -16,7 +16,7 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
     };
 
     return (
-        <Drawer isOpen={isOpen} placement="right" onClose={onClose} size={{ base: 'sm', md: 'md' }}>
+        <Drawer isOpen={isOpen} placement="right" onClose={onClose} size={{ base: 'xs', md: 'md' }}>
             <DrawerOverlay />
             <DrawerContent>
                 <DrawerCloseButton m={3} />
@@ -30,7 +30,7 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                                 objectFit="cover"
                                 borderRadius="lg"
                                 mb="0px"
-                                h="500"
+                                h={{ base: '400px', md: '500px' }}
                                 w="100%"
                             />
                             <Button leftIcon={<FaGoogle />}

@@ -272,8 +272,8 @@ const Search = ({ onAddBird }) => {
             <Flex
                 justify="space-between"
                 align="center"
-                mb="40px"
-                gap={{ base: '10px', md: '10px' }}
+                mb="20px"
+                gap={{ base: '20px', md: '10px' }}
                 direction={{ base: 'column-reverse', md: 'row' }}
             >
                 <InputGroup size='lg' width={{ base: '100%', md: '75%' }}>

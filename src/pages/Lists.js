@@ -419,7 +419,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
             {/* Display the selected list's birds or an empty state if there are no birds */}
             {selectedListDetails ? (
                 selectedListDetails.birds.length > 0 ? (
-                    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="40px">
+                    <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="20px">
                         {selectedListDetails.birds.map((bird) => (
                             <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
                                 <AspectRatio ratio={1 / 1.1}>

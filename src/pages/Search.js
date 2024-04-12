@@ -3,7 +3,7 @@ import {
     Button, Container, Input, SimpleGrid, Box, Image, Heading,
     InputRightElement, Flex, Spinner, AspectRatio, Stack, Tag, Card, Select,
     CardBody, CardFooter, InputGroup, InputLeftElement, Text, IconButton, useToast,
-    Menu, MenuButton, Checkbox, MenuList, MenuItem, MenuGroup
+    Menu, MenuButton, Checkbox, MenuList, MenuItem, MenuGroup, useBreakpointValue
 } from '@chakra-ui/react';
 import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
 import axios from 'axios';
@@ -26,7 +26,7 @@ const Search = ({ onAddBird }) => {
     const [lists, setLists] = useState([]);
     const [selectedList, setSelectedList] = useState('');
     const [updatedBirdCount] = useState(null);
-    const pageSize = 24;
+    const pageSize = 100;
     const apiKey = process.env.REACT_APP_NUTHATCH_API_KEY;
     const [shouldSearchManually, setShouldSearchManually] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -36,6 +36,7 @@ const Search = ({ onAddBird }) => {
     const [selectedRegion, setSelectedRegion] = useState('All Regions');
     const [selectedRegions, setSelectedRegions] = useState(['North America', 'Western Europe']);
     const [lastSearchTerm, setLastSearchTerm] = useState('');
+    const isMobile = useBreakpointValue({ base: true, md: false });
     const toast = useToast();
 
     useEffect(() => {
@@ -43,12 +44,11 @@ const Search = ({ onAddBird }) => {
     }, []);
 
     useEffect(() => {
-        // Trigger search when the region changes if there's an active search term or if a search has been performed before
-        if (searchTerm.trim() !== '' || currentPage !== null) {
-            setShouldSearchManually(true); // Indicate that a search should happen
-            setCurrentPage(0); // Reset to the first page
+        if (shouldSearchManually && searchTerm.trim() !== '' && currentPage !== null) {
+            fetchData();
+            setShouldSearchManually(false); // Reset the manual search trigger after fetching
         }
-    }, [selectedRegion]); // Watch for changes in selectedRegion
+    }, [shouldSearchManually, currentPage, updatedBirdCount, selectedRegion, searchTerm]); // Include searchTerm in the dependency array    
 
     // The existing useEffect that triggers fetchData
     useEffect(() => {
@@ -194,10 +194,21 @@ const Search = ({ onAddBird }) => {
     };
 
     const handleSearch = () => {
-        setCurrentPage(0);
-        setShouldSearchManually(true);
-        setLastSearchTerm(searchTerm); // Update lastSearchTerm here
+        if (searchTerm.trim() !== '') {
+            setCurrentPage(0);
+            setShouldSearchManually(true);
+            setLastSearchTerm(searchTerm); // Update lastSearchTerm here
+        } else {
+            toast({
+                title: "Search Error",
+                description: "Please enter a search term.",
+                status: "info",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
     };
+
 
     const handleKeyPress = (event) => {
         if (event.key === 'Enter') {
@@ -318,6 +329,20 @@ const Search = ({ onAddBird }) => {
                 </Menu>
             </Flex>
 
+            {/* Mobile-only search button */}
+            {isMobile && (
+                <Button
+                    mt="-10px"
+                    mb="20px"
+                    size="lg"
+                    colorScheme="gray"
+                    w="full"
+                    onClick={handleSearch}
+                >
+                    Search
+                </Button>
+            )}
+
             {/* Spinner while loading */}
             {isLoading && (
                 <Flex justify="center" mt="120px">
@@ -325,26 +350,30 @@ const Search = ({ onAddBird }) => {
                 </Flex>
             )}
 
-            {/* Spinner while loading */}
-            {isLoading && <Flex justify="center" mt="120px"><Spinner size="xl" color="blue.500" /></Flex>}
-            {!isLoading && currentPage === null ? (
-                <div></div> // Placeholder for initial state before search
-            ) : birds.length > 0 ? (
-                <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
-                    {birds.map((bird, index) => (
-                        <BirdCard key={index} bird={bird} onDetailsClick={() => handleOpenDrawer(bird)} onAddClick={() => handleOpenModal(bird)} />
-                    ))}
-                </SimpleGrid>
-            ) : (
-                <Flex direction="column" align="center" justify="center" mt="80px">
-                    <Flex mb="20px" justifyContent={"center"}>
-                        <Image src={NoResults} width={"250px"} />
+            {!isLoading && currentPage !== null && (
+                birds.length > 0 ? (
+                    <SimpleGrid spacing="20px" columns={{ base: 1, md: 2, xl: 3 }}>
+                        {birds.map((bird, index) => (
+                            <BirdCard
+                                key={index}
+                                bird={bird}
+                                onDetailsClick={() => handleOpenDrawer(bird)}
+                                onAddClick={() => handleOpenModal(bird)}
+                            />
+                        ))}
+                    </SimpleGrid>
+                ) : (
+                    <Flex direction="column" align="center" justify="center" mt="80px">
+                        <Flex mb="20px" justifyContent={"center"}>
+                            <Image src={NoResults} width={"250px"} />
+                        </Flex>
+                        <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
+                            "{lastSearchTerm}" returned no results. Try expanding your filters or checking your spelling.
+                        </Text>
                     </Flex>
-                    <Text id="no-list" fontSize="xl" textAlign="center" px={4}>
-                        "{lastSearchTerm}" returned no results. Try expanding your filters or checking your spelling.
-                    </Text>
-                </Flex>
+                )
             )}
+
 
             {/* Modals and Drawers */}
 

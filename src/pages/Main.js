@@ -22,7 +22,11 @@ export default class Main extends Component {
       tabIndex: 0,
     };
     this.searchInputRef = createRef();
+
+    // Bind the method
+    this.changeTab = this.changeTab.bind(this);
   }
+
 
   componentDidMount() {
     const currentUser = auth.currentUser;
@@ -36,12 +40,11 @@ export default class Main extends Component {
     }
   }
 
-  changeTabAndFocusSearch = () => {
-    this.setState({ tabIndex: 2 }, () => {
-      // Assuming the Search component properly exposes a focusInput method via forwarded ref
-      this.searchInputRef.current && this.searchInputRef.current.focusInput();
+  changeTab = (index) => {
+    this.setState({ tabIndex: index }, () => {
+      localStorage.setItem('tabIndex', index.toString());
     });
-  }
+}
 
   onTabChange = (index) => {
     this.setState({ tabIndex: index }, () => {
@@ -71,8 +74,9 @@ export default class Main extends Component {
           <TabIndicator mt="0px" height="4px" bg="blue.500" borderRadius="3px" />
           <TabPanels>
             <TabPanel>
-              <Home user={user} />
+              <Home user={user} onNavigateToLists={() => this.changeTab(1)} />
             </TabPanel>
+
             <TabPanel>
               <Lists user={user} refreshLists={refreshLists} onAddBirdsClick={this.changeTabAndFocusSearch} />
             </TabPanel>

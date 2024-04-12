@@ -30,7 +30,7 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                                 objectFit="cover"
                                 borderRadius="lg"
                                 mb="0px"
-                                h={{ base: '350px', md: '500px' }}
+                                h={{ base: '500px', md: '600px' }}
                                 w="100%"
                             />
                             <Button leftIcon={<FaGoogle />}

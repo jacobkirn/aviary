@@ -422,7 +422,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                     <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="20px">
                         {selectedListDetails.birds.map((bird) => (
                             <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
-                                <AspectRatio ratio={1 / 1.1}>
+                                <AspectRatio ratio={1 / 1.25}>
                                     <Image
                                         src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
                                         alt={bird.name}
@@ -500,7 +500,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                     </ModalBody>
                     <ModalFooter>
                         <Button colorScheme="blue" mr={3} onClick={handleAddOrUpdateList}>
-                            {isEditMode ? "Update" : "Create"}
+                            {isEditMode ? "Update List Details" : "Create New List"}
                         </Button>
                         <Button onClick={() => {
                             setShowModal(false);

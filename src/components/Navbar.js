@@ -15,13 +15,14 @@ import {
     useColorMode,
     useDisclosure,
     useBreakpointValue,
+    DrawerHeader,
     Drawer,
     DrawerBody,
     DrawerOverlay,
     DrawerContent,
     DrawerCloseButton,
 } from '@chakra-ui/react';
-import { FaSun, FaMoon, FaGoogle, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { FaSun, FaMoon, FaGoogle, FaUser, FaSignOutAlt, FaBug } from 'react-icons/fa';
 import { LuBird } from "react-icons/lu";
 import { useToast } from "@chakra-ui/react";
 
@@ -72,6 +73,10 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
         });
     };
 
+    const handleReportBug = () => {
+        window.location.href = `mailto:kirnjaco@msu.edu?subject=Bug Report for Aviary App&body=Hi Team,%0D%0A%0D%0AI would like to report a bug I encountered in the Aviary app. Here are the details:%0D%0A%0D%0A[Please describe the issue here]%0D%0A%0D%0AThank you!`;
+    };
+
     return (
         <Flex justifyContent="space-between" alignItems="center" p="4">
             <Flex alignItems="center">
@@ -85,7 +90,7 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                     onClick={toggleColorMode}
                     aria-label="Toggle dark mode"
                     size="md"
-                    
+
                 />
 
                 {user ? (
@@ -96,13 +101,16 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                             onClick={onOpen}
                             ml="10px"
                             size="md"
-                            
+
                         />
                     ) : (
                         <Menu>
-                            <MenuButton as={IconButton} icon={<FaUser />} aria-label="Account menu" 
-                                size="md" ml="10px"/>
+                            
+                            <MenuButton as={IconButton} icon={<FaUser />} aria-label="Account menu"
+                                size="md" ml="10px" />
                             <MenuList>
+                                <MenuItem icon={<FaBug />} onClick={handleReportBug}>Report Bug</MenuItem>
+                                <MenuDivider />
                                 <MenuItem color="red.500" icon={<FaSignOutAlt />} onClick={handleSignOut}>Sign Out</MenuItem>
                             </MenuList>
                         </Menu>
@@ -125,11 +133,14 @@ const Navbar = ({ user, onSignIn, onSignOut }) => {
                 <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
                     <DrawerOverlay />
                     <DrawerContent>
-                        <DrawerCloseButton />
+                        <DrawerCloseButton m={3} />
+                        <DrawerHeader mt={1.5}>Account Settings</DrawerHeader>
                         <DrawerBody p="4">
-                            <Button w="full" onClick={handleSignOut} color="red.600" >
-                                Sign Out Now
-                            </Button>
+                            <Menu>
+                                <MenuItem minH="48px" icon={<FaBug />} onClick={handleReportBug}>Report Bug</MenuItem>
+                                <MenuDivider />
+                                <MenuItem minH="48px" color="red.500" icon={<FaSignOutAlt />} onClick={handleSignOut}>Sign Out</MenuItem>
+                            </Menu>
                         </DrawerBody>
                     </DrawerContent>
                 </Drawer>

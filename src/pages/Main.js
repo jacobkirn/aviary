@@ -44,7 +44,11 @@ export default class Main extends Component {
     this.setState({ tabIndex: index }, () => {
       localStorage.setItem('tabIndex', index.toString());
     });
-}
+  }
+
+  changeTabAndFocusSearch = () => {
+    this.setState({ tabIndex: 2 }); // Assuming the Search tab is at index 2
+  }
 
   onTabChange = (index) => {
     this.setState({ tabIndex: index }, () => {

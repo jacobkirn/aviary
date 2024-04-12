@@ -41,10 +41,10 @@ export default function Home({ user, onNavigateToLists }) {
     return (
         <div>
             <Box>
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: '40px', md: '80px' }}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: '20px', md: '80px' }}>
                     <Box order={{ base: 2, md: 1 }}>
                         <VStack align="start">
-                            <Heading mt={{ base: '0px', md: '40px' }} mb="30px" id="welcome">Welcome, {firstName}.</Heading>
+                            <Heading mt={{ base: '0px', md: '40px' }} mb={{ base: '10px', md: '20px' }} id="welcome">Welcome, {firstName}.</Heading>
                             <Heading size="md" id="home-heading">Explore Aviary</Heading>
                             <Text fontSize="lg">
                                 Aviary was built to help bird enthusiasts track their sightings, ID new birds, and learn more about 1,000+ unique species!
@@ -57,11 +57,11 @@ export default function Home({ user, onNavigateToLists }) {
                             <Button colorScheme="blue" px="20px" onClick={onNavigateToLists}>
                                 Get Started
                             </Button>
-                            <Heading mt="30px" size="md" id="home-heading">About the Project</Heading>
+                            <Heading mt="20px" size="md" id="home-heading">About the Project</Heading>
                             <Text fontSize="lg">
                                 Aviary utilizes <Link href="https://nuthatch.lastelm.software/" color='blue.500' isExternal>Nuthatch API v2.3.0 <ExternalLinkIcon mx='2px' /></Link>, an open-source index of bird data and images. The database is currently in need of more contributors for photography, ID, and coding.
                             </Text>
-                            <Text fontSize="lg" mb="80px">
+                            <Text fontSize="lg" mb="40px">
                                 If you enjoy this tool and are interested in donating towards operational costs and new feature development, <Link href="https://www.buymeacoffee.com/aviaryDev" color='blue.500' isExternal>buy me a coffee <ExternalLinkIcon mx='2px' /></Link>!</Text>
 
                         </VStack>
@@ -77,18 +77,16 @@ export default function Home({ user, onNavigateToLists }) {
                                         objectFit="cover"
                                         w="100%"
                                     />
-                                    <Box className="overlay" color="white">
-                                        <Flex direction="column" justifyContent="space-between" h="320px">
-                                            <Box>
-                                                <Tag colorScheme='orange' mb="10px">Bird of the Week</Tag>
-                                            </Box>
-                                            <Box>
-                                                <Heading size="lg" id="welcome" mb="20px">{birdOfTheWeek.name}</Heading>
-                                                <Link href={`https://en.wikipedia.org/wiki/${encodeURIComponent(birdOfTheWeek.name)}`} isExternal>
-                                                    <Button leftIcon={<FcWikipedia fontSize="24px" />} colorScheme="gray" px="20px" size="lg">Learn More</Button>
-                                                </Link>
-                                            </Box>
-                                        </Flex>
+                                    <Box className="overlay" color="white" padding={{ base: '20px', md: '40px'}}>
+                                        <Box>
+                                            <Tag colorScheme='orange' mb="10px">Bird of the Week</Tag>
+                                        </Box>
+                                        <Box>
+                                            <Heading size="lg" id="welcome" mb="20px">{birdOfTheWeek.name}</Heading>
+                                            <Link href={`https://en.wikipedia.org/wiki/${encodeURIComponent(birdOfTheWeek.name)}`} isExternal>
+                                                <Button leftIcon={<FcWikipedia fontSize="24px" />} colorScheme="gray" px="20px" size="lg">Learn More</Button>
+                                            </Link>
+                                        </Box>
                                     </Box>
                                 </Box>
                             ) : (

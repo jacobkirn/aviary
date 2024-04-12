@@ -19,7 +19,7 @@ const AddBirdModal = ({
     handleAddToList
 }) => {
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} size={{ base: 'sm', md: 'md' }}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Add Bird to List</ModalHeader>

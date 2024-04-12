@@ -41,21 +41,28 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
             const listsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
                 const listData = {
                     id: doc.id,
-                    ...doc.data(),
+                    ...doc.data()
                 };
                 const birdsSnapshot = await getDocs(collection(db, 'lists', doc.id, 'birds'));
                 listData.birds = birdsSnapshot.docs.map(birdDoc => ({
                     docId: birdDoc.id,
-                    ...birdDoc.data(),
+                    ...birdDoc.data()
                 }));
                 return listData;
             }));
+
             setLists(listsData);
-            if (listsData.length > 0) setSelectedListId(listsData[0].id);
+            // Check if the currently selected list ID is still valid
+            const listIds = listsData.map(list => list.id);
+            if (!listIds.includes(selectedListId) && listIds.length > 0) {
+                setSelectedListId(listIds[0]); // Reset to the first list if the current one is no longer valid
+            }
+            localStorage.setItem('selectedListId', selectedListId); // Update local storage with the current or reset list ID
         } catch (error) {
+            console.error("Error fetching lists and birds:", error);
             toast({
-                title: "Error fetching lists and birds.",
-                description: "Unable to fetch data. Please try again later.",
+                title: "Error fetching data",
+                description: "Unable to fetch lists and birds. Please try again later.",
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -65,8 +72,21 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 
     useEffect(() => {
         fetchListsAndBirds();
+        // Restore the selected list ID from local storage on component mount
+        const savedListId = localStorage.getItem('selectedListId');
+        if (savedListId) {
+            setSelectedListId(savedListId);
+        }
     }, [user, refreshLists]);
 
+
+    useEffect(() => {
+        fetchListsAndBirds();
+        const savedListId = localStorage.getItem('selectedListId');
+        if (savedListId) {
+            setSelectedListId(savedListId);
+        }
+    }, [user, refreshLists]);
     const handleAddOrUpdateList = async () => {
         if (!newListName.trim()) {
             toast({
@@ -237,6 +257,12 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
         }
     };
 
+    const handleSelectedListChange = (e) => {
+        const newSelectedListId = e.target.value;
+        setSelectedListId(newSelectedListId);
+        localStorage.setItem('selectedListId', newSelectedListId); // Save to localStorage
+    };
+
     const handleOpenDrawer = (bird) => {
         setSelectedBirdForDetails(bird);
         setIsDrawerOpen(true);
@@ -327,7 +353,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                 <Select
                     size="lg"
                     value={selectedListId}
-                    onChange={(e) => setSelectedListId(e.target.value)}
+                    onChange={handleSelectedListChange}
                     flex={{ base: "1", md: "none" }}
                     width={{ base: "100%", md: "300px" }}
                     style={{ paddingLeft: '0.75em', paddingRight: '0.75em' }}
@@ -349,9 +375,9 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                         Settings
                     </MenuButton>
                     <MenuList size="lg">
-                        <MenuItem minH='40px' icon={<FaEdit />} onClick={handleEditListDetails}>Edit Details</MenuItem>
-                        <MenuItem minH='40px' icon={<FaCopy />} onClick={handleDuplicateListWithBirds}>Duplicate List</MenuItem>
-                        <MenuItem minH='40px' icon={<FaTrashAlt />} onClick={() => promptDeleteList(selectedListId)}>Delete List</MenuItem>
+                        <MenuItem minH='40px' icon={<FaEdit fontSize="16px" />} onClick={handleEditListDetails}>Edit List Details</MenuItem>
+                        <MenuItem minH='40px' icon={<FaCopy fontSize="16px" />} onClick={handleDuplicateListWithBirds}>Duplicate List</MenuItem>
+                        <MenuItem minH='40px' icon={<FaTrashAlt fontSize="16px" />} onClick={() => promptDeleteList(selectedListId)}>Delete List</MenuItem>
                     </MenuList>
                 </Menu>
                 <IconButton
@@ -361,8 +387,8 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                     size="lg"
                     colorScheme='gray'
                     variant={'outline'}
-                    fontSize="24px"
-                    flexShrink="0" 
+                    fontSize="28px"
+                    flexShrink="0"
                     ml="10px"
                 />
             </Box>
@@ -410,7 +436,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                                     </Heading>
                                     <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
                                 </CardBody>
-                                <CardFooter gap="10px" mt="-24px">
+                                <CardFooter mt="-24px">
                                     <Button
                                         size="lg"
                                         m="1"
@@ -460,7 +486,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>{newListName ? "Edit List Details" : "Create New List"}</ModalHeader>
+                    <ModalHeader>List Details</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody pb={6}>
                         <FormControl isRequired>

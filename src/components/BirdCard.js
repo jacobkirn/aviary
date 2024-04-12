@@ -34,7 +34,7 @@ const BirdCard = ({ bird, onDetailsClick, onAddClick }) => (
                     </Tag>
                 </Stack>
             </CardBody>
-            <CardFooter gap="10px" mt="-24px">
+            <CardFooter mt="-24px">
                 <Button m="1" size="lg" variant='outline' colorScheme='gray' flex={1} onClick={() => onDetailsClick(bird)}>
                     Details
                 </Button>

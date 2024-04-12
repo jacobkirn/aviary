@@ -76,7 +76,6 @@ export default class Main extends Component {
             <TabPanel>
               <Home user={user} onNavigateToLists={() => this.changeTab(1)} />
             </TabPanel>
-
             <TabPanel>
               <Lists user={user} refreshLists={refreshLists} onAddBirdsClick={this.changeTabAndFocusSearch} />
             </TabPanel>

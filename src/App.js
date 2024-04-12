@@ -11,19 +11,28 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
+    // Listen for authentication state changes
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
     });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   return (
     <ChakraProvider>
-      <Navbar
-        user={user}
-        onSignIn={signInWithGoogle}
-        onSignOut={() => signOut().then(() => setUser(null))}
-      />
-      {user ? <Main /> : <NotLogged />}
+      {user ? (
+        <>
+          <Navbar
+            user={user}
+            onSignOut={() => signOut().then(() => setUser(null))}
+          />
+          <Main />
+        </>
+      ) : (
+        <NotLogged onSignIn={signInWithGoogle} />
+      )}
     </ChakraProvider>
   );
 }

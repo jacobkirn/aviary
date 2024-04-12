@@ -315,12 +315,12 @@ const Search = ({ onAddBird }) => {
                     <MenuList>
                         <MenuGroup fontSize="16px" px="10px" mt="4px" title="Region Filter">
                             <MenuItem as="label">
-                                <Checkbox isChecked={selectedRegions.includes('North America')} onChange={() => handleRegionChange('North America')}>
+                                <Checkbox minH="32px" isChecked={selectedRegions.includes('North America')} onChange={() => handleRegionChange('North America')}>
                                     North America
                                 </Checkbox>
                             </MenuItem>
                             <MenuItem as="label">
-                                <Checkbox isChecked={selectedRegions.includes('Western Europe')} onChange={() => handleRegionChange('Western Europe')}>
+                                <Checkbox minH="32px" isChecked={selectedRegions.includes('Western Europe')} onChange={() => handleRegionChange('Western Europe')}>
                                     Western Europe
                                 </Checkbox>
                             </MenuItem>

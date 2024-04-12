@@ -4,16 +4,31 @@ import {
     DrawerCloseButton, Image, Text, Heading, Flex
 } from '@chakra-ui/react';
 import { FaGoogle } from 'react-icons/fa';
+import { getBirdImageIndex } from '../pages/Lists';
 
 const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick, showAddToListButton }) => {
-    const displayValueOrPlaceholder = (value, placeholder = "No Data Available") =>
-        value ? value : placeholder;
+    const displayValueOrPlaceholder = (value, placeholder = "No Data Available") => value ? value : placeholder;
+
+    // Correctly calculate the image index using the provided function
+    const imageIndex = selectedBirdForDetails ? getBirdImageIndex(selectedBirdForDetails) : 0;
+
+    // Ensure the imageUrl calculation respects the imageIndex
+    const imageUrl = selectedBirdForDetails && selectedBirdForDetails.images && selectedBirdForDetails.images.length > imageIndex
+        ? selectedBirdForDetails.images[imageIndex]
+        : 'https://via.placeholder.com/150';
 
     const handleGoogleImageSearch = () => {
-        const query = encodeURIComponent(selectedBirdForDetails.name);
-        const url = `https://www.google.com/search?tbm=isch&q=${query}`;
-        window.open(url, '_blank');
+        if (selectedBirdForDetails) {
+            const query = encodeURIComponent(selectedBirdForDetails.name);
+            const url = `https://www.google.com/search?tbm=isch&q=${query}`;
+            window.open(url, '_blank');
+        }
     };
+
+    if (!selectedBirdForDetails) {
+        return null; // Optionally provide a placeholder or message here
+    }
+
 
     return (
         <Drawer isOpen={isOpen} placement="right" onClose={onClose} size={{ base: 'sm', md: 'md' }}>
@@ -25,7 +40,7 @@ const BirdDrawer = ({ isOpen, onClose, selectedBirdForDetails, onAddToListClick,
                     {selectedBirdForDetails ? (
                         <>
                             <Image
-                                src={selectedBirdForDetails.images && selectedBirdForDetails.images.length > 0 ? selectedBirdForDetails.images[0] : 'https://via.placeholder.com/150'}
+                                src={imageUrl}
                                 alt={displayValueOrPlaceholder(selectedBirdForDetails.name)}
                                 objectFit="cover"
                                 borderRadius="lg"

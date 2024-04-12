@@ -15,6 +15,11 @@ import BirdDrawer from '../components/BirdDrawer';
 import { MdOutlinePlaylistAdd } from "react-icons/md";
 import { FaEdit, FaCopy, FaTrashAlt } from 'react-icons/fa';
 
+export const getBirdImageIndex = (bird) => {
+    const birdsWithSpecialImageRule = ['Northern Cardinal', 'Northern Flicker'];
+    return birdsWithSpecialImageRule.includes(bird.name) ? 1 : 0;
+};
+
 const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
     const [lists, setLists] = useState([]);
     const [showModal, setShowModal] = useState(false);
@@ -416,49 +421,53 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                 )}
             </Flex>
 
-            {/* Display the selected list's birds or an empty state if there are no birds */}
             {selectedListDetails ? (
                 selectedListDetails.birds.length > 0 ? (
                     <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="20px">
-                        {selectedListDetails.birds.map((bird) => (
-                            <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
-                                <AspectRatio ratio={1 / 1.25}>
-                                    <Image
-                                        src={bird.images && bird.images.length > 0 ? bird.images[0] : 'https://via.placeholder.com/150'}
-                                        alt={bird.name}
-                                        objectFit="cover"
-                                        style={{ borderRadius: '5px 5px 0px 0px' }}
-                                    />
-                                </AspectRatio>
-                                <CardBody p="6">
-                                    <Heading id="logo" as="h3" size="md" mb="8px">
-                                        {bird.name}
-                                    </Heading>
-                                    <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
-                                </CardBody>
-                                <CardFooter mt="-24px">
-                                    <Button
-                                        size="lg"
-                                        m="1"
-                                        variant='outline'
-                                        colorScheme='gray'
-                                        flex={1}
-                                        onClick={() => handleOpenDrawer(bird)}
-                                    >
-                                        Details
-                                    </Button>
-                                    <Button
-                                        size="lg"
-                                        m="1"
-                                        variant='outline'
-                                        colorScheme='gray'
-                                        flex={1}
-                                        onClick={() => promptDeleteBird(selectedListId, bird.docId)}>
-                                        Remove
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                        {selectedListDetails.birds.map((bird) => {
+                            const imageIndex = getBirdImageIndex(bird);
+                            const imageUrl = bird.images && bird.images.length > imageIndex ? bird.images[imageIndex] : 'https://via.placeholder.com/150';
+
+                            return (
+                                <Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
+                                    <AspectRatio ratio={1 / 1.25}>
+                                        <Image
+                                            src={imageUrl}
+                                            alt={bird.name}
+                                            objectFit="cover"
+                                            style={{ borderRadius: '5px 5px 0px 0px' }}
+                                        />
+                                    </AspectRatio>
+                                    <CardBody p="6">
+                                        <Heading id="logo" as="h3" size="md" mb="8px">
+                                            {bird.name}
+                                        </Heading>
+                                        <Tag mt="10px" colorScheme={getColorScheme(bird.status)}>{bird.status || "Conservation Status Unknown"}</Tag>
+                                    </CardBody>
+                                    <CardFooter mt="-24px">
+                                        <Button
+                                            size="lg"
+                                            m="1"
+                                            variant='outline'
+                                            colorScheme='gray'
+                                            flex={1}
+                                            onClick={() => handleOpenDrawer(bird)}
+                                        >
+                                            Details
+                                        </Button>
+                                        <Button
+                                            size="lg"
+                                            m="1"
+                                            variant='outline'
+                                            colorScheme='gray'
+                                            flex={1}
+                                            onClick={() => promptDeleteBird(selectedListId, bird.docId)}>
+                                            Remove
+                                        </Button>
+                                    </CardFooter>
+                                </Card>
+                            );
+                        })}
                     </SimpleGrid>
                 ) : (
                     <Flex direction="column" align="center" justify="center" mt="80px" mb="80px">
@@ -472,7 +481,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
                     </Flex>
                 )
             ) : (
-                <Text fontSize="xl"></Text>
+                <Text fontSize="xl">Loading birds...</Text>
             )}
 
             <BirdDrawer

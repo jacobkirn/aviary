@@ -1,53 +1,99 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    Heading,
-    Box,
-    SimpleGrid,
-    VStack,
-    Link,
-    UnorderedList,
-    ListItem,
-    Button,
-    Text,
+    Heading, Box, SimpleGrid, VStack, Link, UnorderedList, ListItem, Button, Image, Text, Tag, Flex
 } from '@chakra-ui/react';
+import axios from 'axios';
+import { ExternalLinkIcon } from '@chakra-ui/icons'
+import { FcWikipedia } from "react-icons/fc";
 
-export default function Home({ user, onNavigateToLists  }) {
+export default function Home({ user, onNavigateToLists }) {
     const firstName = user ? user.displayName.split(' ')[0] : 'Guest';
+    const [birdOfTheWeek, setBirdOfTheWeek] = useState(null);
+    const apiKey = process.env.REACT_APP_NUTHATCH_API_KEY;
 
+    useEffect(() => {
+        const weekNumber = Math.floor((new Date()).getTime() / (1000 * 60 * 60 * 24 * 7));
+        const randomSeed = weekNumber % 52; // Modify as needed based on your API's data
+
+        const fetchBirdOfTheWeek = async () => {
+            try {
+                const response = await axios.get(`https://nuthatch.lastelm.software/v2/birds?page=${randomSeed}&pageSize=1&hasImg=true`, {
+                    headers: { 'api-key': apiKey }
+                });
+                if (response.data && response.data.entities.length > 0) {
+                    setBirdOfTheWeek(response.data.entities[0]);
+                } else {
+                    setBirdOfTheWeek(null);
+                }
+            } catch (error) {
+                console.error('Error fetching bird of the week:', error);
+                setBirdOfTheWeek(null);
+            }
+        };
+
+        fetchBirdOfTheWeek();
+    }, []);
+
+    useEffect(() => {
+        console.log(birdOfTheWeek); // Check the structure of birdOfTheWeek
+    }, [birdOfTheWeek]);
 
     return (
         <div>
             <Box>
-                <Heading mt="40px" mb="20px" id="welcome">Welcome, {firstName}.</Heading>
-                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-                    <Box>
-                        <VStack align="start" spacing="10px">
-                            <Heading size="md" id="logo">Explore Aviary</Heading>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: '40px', md: '80px' }}>
+                    <Box order={{ base: 2, md: 1 }}>
+                        <VStack align="start">
+                            <Heading mt={{ base: '0px', md: '40px' }} mb="30px" id="welcome">Welcome, {firstName}.</Heading>
+                            <Heading size="md" id="home-heading">Explore Aviary</Heading>
                             <Text fontSize="lg">
-                                Aviary was built to help bird enthusiasts track their sightings, identify new birds, and learn more about 1,000+ unique species!
-                                <UnorderedList mt="10px">
-                                    <ListItem>Create up to 25 lists</ListItem>
-                                    <ListItem>Earn milestones as you go</ListItem>
-                                    <ListItem>Filter by geographical region</ListItem>
-                                </UnorderedList>
+                                Aviary was built to help bird enthusiasts track their sightings, ID new birds, and learn more about 1,000+ unique species!
                             </Text>
-                            <Button colorScheme="blue" mt="10px" px="20px" onClick={onNavigateToLists}>
+                            <UnorderedList mb="10px" fontSize="lg">
+                                <ListItem>Create up to 25 lists</ListItem>
+                                <ListItem>Earn milestones as you go</ListItem>
+                                <ListItem>Filter by geographical region</ListItem>
+                            </UnorderedList>
+                            <Button colorScheme="blue" px="20px" onClick={onNavigateToLists}>
                                 Get Started
                             </Button>
+                            <Heading mt="30px" size="md" id="home-heading">About the Project</Heading>
+                            <Text fontSize="lg">
+                                Aviary utilizes <Link href="https://nuthatch.lastelm.software/" color='blue.500' isExternal>Nuthatch API v2.3.0 <ExternalLinkIcon mx='2px' /></Link>, an open-source index of bird data and images. The database is currently in need of more contributors for photography, ID, and coding.
+                            </Text>
+                            <Text fontSize="lg" mb="80px">
+                                If you enjoy this tool and are interested in donating towards operational costs and new feature development, <Link href="https://www.buymeacoffee.com/aviaryDev" color='blue.500' isExternal>buy me a coffee <ExternalLinkIcon mx='2px' /></Link>!</Text>
+
                         </VStack>
                     </Box>
-                    <Box>
-                        <VStack align="start" spacing="10px">
-                        <Heading size="md" id="logo">About the Project</Heading>
-                            <Text fontSize="lg">
-                                Aviary utilizes Nuthatch API v2.3.0, an open-source index of bird data and images. The database is currently in need of more contributors for photography, ID, and coding.
-                            </Text>
-                            <Link href="https://nuthatch.lastelm.software/" isExternal>
-                                <Button colorScheme="orange" mt="10px" px="20px">Learn more about Nuthatch API</Button>
-                            </Link>
-                            <Link href="https://www.buymeacoffee.com/aviaryDev" isExternal>
-                                <Button colorScheme="green" mt="10px" px="20px">Buy me a coffee</Button>
-                            </Link>
+                    <Box order={{ base: 1, md: 2 }} mt="40px">
+                        <VStack align="start">
+                            {birdOfTheWeek ? (
+                                <Box w="100%" className="bird-of-the-week" position="relative" borderRadius="lg" overflow="hidden">
+                                    <Image
+                                        className="Image"
+                                        src={birdOfTheWeek?.images?.[0] ?? 'https://via.placeholder.com/150'}
+                                        alt={birdOfTheWeek?.name || 'Bird Image'}
+                                        objectFit="cover"
+                                        w="100%"
+                                    />
+                                    <Box className="overlay" color="white">
+                                        <Flex direction="column" justifyContent="space-between" h="320px">
+                                            <Box>
+                                                <Tag colorScheme='orange' mb="10px">Bird of the Week</Tag>
+                                            </Box>
+                                            <Box>
+                                                <Heading size="lg" id="welcome" mb="20px">{birdOfTheWeek.name}</Heading>
+                                                <Link href={`https://en.wikipedia.org/wiki/${encodeURIComponent(birdOfTheWeek.name)}`} isExternal>
+                                                    <Button leftIcon={<FcWikipedia fontSize="24px" />} colorScheme="gray" px="20px" size="lg">Learn More</Button>
+                                                </Link>
+                                            </Box>
+                                        </Flex>
+                                    </Box>
+                                </Box>
+                            ) : (
+                                <Text>Loading bird of the week...</Text>
+                            )}
                         </VStack>
                     </Box>
                 </SimpleGrid>

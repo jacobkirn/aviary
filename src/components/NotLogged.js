@@ -4,24 +4,24 @@ import {
   Button,
   Center,
   Container,
+  UnorderedList,
+  ListItem,
   Heading,
+  Link,
   Text,
   VStack,
   useToast
 } from '@chakra-ui/react';
 import { FaGoogle } from 'react-icons/fa';
+import { ExternalLinkIcon } from '@chakra-ui/icons'
 import Logo from '../images/aviary-logo.png';
 
-// Convert to function component to use hooks effectively
 function NotLogged({ onSignIn }) {
   const toast = useToast();
 
   const handleSignIn = async () => {
     try {
-      // Call onSignIn function, assuming it returns a promise
       await onSignIn();
-
-      // Display toast for sign-in success
       toast({
         title: "Login Successful",
         description: "You have successfully logged in.",
@@ -30,9 +30,7 @@ function NotLogged({ onSignIn }) {
         isClosable: true,
       });
     } catch (error) {
-      // Handle any errors that occur during sign-in
       console.error("Error signing in:", error);
-      // Optionally, display an error toast
       toast({
         title: "Login Error",
         description: "An error occurred while logging in. Please try again.",
@@ -46,35 +44,56 @@ function NotLogged({ onSignIn }) {
   return (
     <div id="login-bg">
       <Container>
-      <Center h="100vh"> {/* This centers the card vertically and horizontally in the viewport */}
-        <Box
-        bg="white"
-          w="100%"
-          maxW="md"
-          p="40px"
-          borderWidth="1px"
-          borderRadius="lg"
-          boxShadow="lg"
-          textAlign="center"
-        >
-          <VStack>
-            <img src={Logo} width="25%"/>
-            <Heading mt="20px" size="lg" id="login">Welcome to Aviary</Heading>
-            <Text mb="20px" fontSize="18px">
-              Connect your Google account to create lists and search our extensive bird database.
-            </Text>
-            <Button
-              leftIcon={<FaGoogle />}
-              colorScheme="green"
-              onClick={handleSignIn} // use local handler that invokes toast
-              size="lg"
+        <Center h="100vh">
+          <VStack
+            spacing="20px"
+            align="stretch"
+            maxW="md"
+          >
+            <Box
+              bg="white"
+              color="black"
+              p="40px"
+              borderWidth="1px"
+              borderRadius="lg"
+              boxShadow="lg"
             >
-              Continue with Google
-            </Button>
+              <img src={Logo} width="20%" />
+              <Heading mt="20px" size="lg" id="login">Welcome to Aviary</Heading>
+              <Text mt="10px" fontSize="lg">
+                Aviary was built to help bird enthusiasts track their sightings, ID new birds, and learn more about 1,000+ unique species!
+              </Text>
+              <UnorderedList mt="10px" mb="20px" ml="0px" fontSize="lg" textAlign="left" listStyleType="none">
+                <ListItem mb="10px"><span id="emoji">📋</span> Create up to 25 lists</ListItem>
+                <ListItem mb="10px"><span id="emoji">🏆</span> Earn milestones as you go</ListItem>
+                <ListItem><span id="emoji">🌎</span> Filter by geographical region</ListItem>
+              </UnorderedList>
+              <Button
+                leftIcon={<FaGoogle />}
+                colorScheme="green"
+                onClick={handleSignIn}
+                size="lg"
+                width="full"
+              >
+                Sign Up / Log In
+              </Button>
+            </Box>
+            <Box
+              bg="white"
+              color="black"
+              p="40px"
+              borderWidth="1px"
+              borderRadius="lg"
+              boxShadow="lg"
+            >
+              <Heading size="md" id="home-heading">About the Project</Heading>
+              <Text mt="10px" fontSize="lg">
+                Aviary utilizes <Link href="https://nuthatch.lastelm.software/" color='blue.500' isExternal>Nuthatch API v2.3.0 <ExternalLinkIcon mx='2px' /></Link>, an open-source index of bird data and images. The database is currently in need of more contributors for photography, ID, and coding.
+              </Text>
+            </Box>
           </VStack>
-        </Box>
-      </Center>
-    </Container>
+        </Center>
+      </Container>
     </div>
   );
 }

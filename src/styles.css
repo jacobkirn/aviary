@@ -31,9 +31,15 @@
     font-optical-sizing: auto;
     font-weight: 600;
     font-style: normal;
+    color:#000000;
     font-size: 32px;
-    margin-bottom: 10px;
     padding: 0;
+}
+
+#emoji {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
 }
 
 #home-heading {
@@ -41,7 +47,7 @@
     font-optical-sizing: auto;
     font-weight: 600;
     font-style: normal;
-    font-size: 28px;
+    font-size: 32px;
 }
 
 .bird-of-the-week {

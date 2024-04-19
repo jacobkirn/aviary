@@ -482,6 +482,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 				<Text fontSize="xl">Loading birds...</Text>
 			)}
 
+
 			<BirdDrawer
 				isOpen={isDrawerOpen}
 				onClose={() => setIsDrawerOpen(false)}
@@ -552,6 +553,27 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 					</ModalFooter>
 				</ModalContent>
 			</Modal>
+			{/* FAB Button */}
+			{selectedListDetails && selectedListDetails.birds.length > 0 && (
+				<Button
+					icon={<IoMdAdd />}
+					position="fixed"
+					bottom="20px"
+					left="50%"
+					transform="translateX(-50%)"
+					colorScheme="blue"
+					borderRadius="full"
+					boxShadow="lg"
+					size="lg"
+					w="80px"
+					h="80px"
+					onClick={onAddBirdsClick}
+					zIndex="docked"
+					p="0"
+				>
+					<IoMdAdd size="32px"/>
+				</Button>
+			)}
 		</Container>
 	);
 };

@@ -46,7 +46,7 @@ function NotLogged({ onSignIn }) {
 			<Container py={{ base: '40px', md: '0px' }}>
 				<Center minH={{ base: 'auto', md: '100vh' }} w="100%">
 					<VStack
-						spacing={{ base: '40px', md: '20px' }}
+						spacing="20px"
 						align="stretch"
 						maxW="md"
 					>

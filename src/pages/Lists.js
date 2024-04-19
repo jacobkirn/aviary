@@ -323,7 +323,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 					Create New List
 				</Button>
 
-				<Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+				<Modal isOpen={showModal} onClose={() => setShowModal(false)} size={{ base: 'xs', md: 'md' }}>
 					<ModalOverlay />
 					<ModalContent>
 						<ModalHeader>Create New List</ModalHeader>
@@ -491,7 +491,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 			/>
 
 			{/* Add List Modal */}
-			<Modal isOpen={showModal} onClose={() => setShowModal(false)} size={{ base: 'sm', md: 'md' }}>
+			<Modal isOpen={showModal} onClose={() => setShowModal(false)} size={{ base: 'xs', md: 'md' }}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>List Details</ModalHeader>
@@ -521,7 +521,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 				</ModalContent>
 			</Modal>
 
-			<Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} size={{ base: 'sm', md: 'md' }}>
+			<Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} size={{ base: 'xs', md: 'md' }}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Confirm Deletion</ModalHeader>
@@ -537,7 +537,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 					</ModalFooter>
 				</ModalContent>
 			</Modal>
-			<Modal isOpen={showBirdDeleteConfirmModal} onClose={() => setShowBirdDeleteConfirmModal(false)} size={{ base: 'sm', md: 'md' }}>
+			<Modal isOpen={showBirdDeleteConfirmModal} onClose={() => setShowBirdDeleteConfirmModal(false)} size={{ base: 'xs', md: 'md' }}>
 				<ModalOverlay />
 				<ModalContent>
 					<ModalHeader>Confirm Bird Removal</ModalHeader>

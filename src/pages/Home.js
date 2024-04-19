@@ -13,7 +13,7 @@ export default function Home({ user, onNavigateToLists }) {
 
     useEffect(() => {
         const weekNumber = Math.floor((new Date()).getTime() / (1000 * 60 * 60 * 24 * 7));
-        const randomSeed = weekNumber % 52; // Modify as needed based on your API's data
+        const randomSeed = weekNumber % 52;
 
         const fetchBirdOfTheWeek = async () => {
             try {
@@ -35,7 +35,7 @@ export default function Home({ user, onNavigateToLists }) {
     }, []);
 
     useEffect(() => {
-        console.log(birdOfTheWeek); // Check the structure of birdOfTheWeek
+        console.log(birdOfTheWeek);
     }, [birdOfTheWeek]);
 
     return (

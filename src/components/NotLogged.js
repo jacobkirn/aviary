@@ -61,7 +61,7 @@ function NotLogged({ onSignIn }) {
               <img src={Logo} width="20%" />
               <Heading mt="20px" size="lg" id="login">Welcome to Aviary</Heading>
               <Text mt="10px" fontSize="lg">
-                Aviary was built to help bird enthusiasts track their sightings, ID new birds, and learn more about 1,000+ unique species!
+                Aviary was built to help bird enthusiasts track their sightings, ID new birds, and learn more about 1,000+ unique species — for free!
               </Text>
               <UnorderedList mt="10px" mb="20px" ml="0px" fontSize="lg" textAlign="left" listStyleType="none">
                 <ListItem mb="10px"><span id="emoji">📋</span> Create up to 25 lists</ListItem>

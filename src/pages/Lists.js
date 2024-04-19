@@ -421,7 +421,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 
 			{selectedListDetails ? (
 				selectedListDetails.birds.length > 0 ? (
-					<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="20px">
+					<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="20px" mb="120px">
 						{selectedListDetails.birds.map((bird) => {
 							const imageIndex = getBirdImageIndex(bird);
 							const imageUrl = bird.images && bird.images.length > imageIndex ? bird.images[imageIndex] : 'https://via.placeholder.com/150';

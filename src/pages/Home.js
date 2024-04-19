@@ -55,15 +55,12 @@ export default function Home({ user, onNavigateToLists }) {
                                 <ListItem>Filter by geographical region</ListItem>
                             </UnorderedList>
                             <Button size="lg" colorScheme="blue" px="20px" onClick={onNavigateToLists}>
-                                Get Started
+                                View Lists
                             </Button>
                             <Heading mt="20px" size="md" id="home-heading">About the Project</Heading>
                             <Text fontSize="lg">
                                 Aviary utilizes <Link href="https://nuthatch.lastelm.software/" color='blue.500' isExternal>Nuthatch API v2.3.0 <ExternalLinkIcon mx='2px' /></Link>, an open-source index of bird data and images. The database is currently in need of more contributors for photography, ID, and coding.
                             </Text>
-                            <Text fontSize="lg" mb="40px">
-                                If you enjoy this tool and are interested in donating towards operational costs and new feature development, <Link href="https://www.buymeacoffee.com/aviaryDev" color='blue.500' isExternal>buy me a coffee <ExternalLinkIcon mx='2px' /></Link>!</Text>
-
                         </VStack>
                     </Box>
                     <Box order={{ base: 1, md: 2 }} mt="40px">

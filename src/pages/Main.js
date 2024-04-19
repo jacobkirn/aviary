@@ -34,10 +34,12 @@ export default class Main extends Component {
 		if (currentUser) {
 			this.setState({ user: currentUser });
 		}
-
+	
 		const savedTabIndex = localStorage.getItem('tabIndex');
 		if (savedTabIndex) {
 			this.setState({ tabIndex: Number(savedTabIndex) });
+		} else {
+			this.setState({ tabIndex: 0 });
 		}
 	}
 
@@ -48,7 +50,7 @@ export default class Main extends Component {
 	}
 
 	changeTabAndFocusSearch = () => {
-		this.setState({ tabIndex: 1 }); // Assuming the Search tab is at index 2
+		this.setState({ tabIndex: 1 }); 
 	}	
 
 	onTabChange = (index) => {

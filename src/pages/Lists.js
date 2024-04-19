@@ -59,6 +59,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 			setLists(listsData);
 			const listIds = listsData.map(list => list.id);
 			if (!listIds.includes(selectedListId) && listIds.length > 0) {
+				setSelectedListId(listIds[0]);
 			}
 			localStorage.setItem('selectedListId', selectedListId);
 		} catch (error) {
@@ -223,6 +224,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 
 		const db = getFirestore();
 		try {
+			// Duplicate the list
 			const newListRef = await addDoc(collection(db, 'lists'), {
 				name: `${listToDuplicate.name} (copy)`,
 				description: listToDuplicate.description,
@@ -230,10 +232,11 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 				createdAt: serverTimestamp(),
 			});
 
+			// Duplicate each bird
 			for (const bird of listToDuplicate.birds) {
 				await addDoc(collection(db, 'lists', newListRef.id, 'birds'), {
 					...bird,
-					createdAt: serverTimestamp() 
+					createdAt: serverTimestamp()
 				});
 			}
 
@@ -319,6 +322,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 				<Button size="lg" leftIcon={<IoMdAdd />} colorScheme="blue" mt="20px" px="20px" onClick={() => setShowModal(true)}>
 					Create New List
 				</Button>
+
 				<Modal isOpen={showModal} onClose={() => setShowModal(false)}>
 					<ModalOverlay />
 					<ModalContent>
@@ -391,6 +395,7 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 					ml="10px"
 				/>
 			</Box>
+
 			<Flex alignItems="center" flexWrap="wrap" gap="10px" mt="20px" mb="20px">
 				{selectedListDetails && (
 					<>
@@ -413,12 +418,14 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 					</>
 				)}
 			</Flex>
+
 			{selectedListDetails ? (
 				selectedListDetails.birds.length > 0 ? (
 					<SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="20px" mt="20px">
 						{selectedListDetails.birds.map((bird) => {
 							const imageIndex = getBirdImageIndex(bird);
 							const imageUrl = bird.images && bird.images.length > imageIndex ? bird.images[imageIndex] : 'https://via.placeholder.com/150';
+
 							return (
 								<Card key={bird.docId} borderWidth="1px" variant="outline" borderRadius="lg" overflow="hidden">
 									<AspectRatio ratio={1 / 1.25}>
@@ -474,12 +481,14 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 			) : (
 				<Text fontSize="xl">Loading birds...</Text>
 			)}
+
 			<BirdDrawer
 				isOpen={isDrawerOpen}
 				onClose={() => setIsDrawerOpen(false)}
 				selectedBirdForDetails={selectedBirdForDetails}
 				showAddToListButton={false}
 			/>
+
 			{/* Add List Modal */}
 			<Modal isOpen={showModal} onClose={() => setShowModal(false)} size={{ base: 'sm', md: 'md' }}>
 				<ModalOverlay />
@@ -507,8 +516,10 @@ const Lists = ({ user, refreshLists, onAddBirdsClick }) => {
 							setNewListDescription('');
 						}}>Cancel</Button>
 					</ModalFooter>
+
 				</ModalContent>
 			</Modal>
+
 			<Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)} size={{ base: 'sm', md: 'md' }}>
 				<ModalOverlay />
 				<ModalContent>

@@ -43,10 +43,9 @@ function NotLogged({ onSignIn }) {
 
 	return (
 		<div id="login-bg">
-			<Container>
+			<Container py={{ base: '40px', md: '0px' }}>
 				<Center h="100vh">
 					<VStack
-						py="40px"
 						spacing="20px"
 						align="stretch"
 						maxW="md"
